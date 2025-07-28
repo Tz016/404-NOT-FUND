@@ -10,7 +10,7 @@ portfolio-manager/
 │   ├── docs/
 │   ├── app.js
 │   ├── server.js
-│   └── package.json    ✅ 后端自己的依赖放这里
+│   └── package.json    ✅ 后己的依赖放这里
 │
 ├── frontend/           # 可以是 React 或 Vue 项目
 │   ├── public/
