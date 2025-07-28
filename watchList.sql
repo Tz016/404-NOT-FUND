@@ -3,7 +3,7 @@ CREATE TABLE WatchList (
     account_id INT,
     stock_ticker VARCHAR(20),
     stock_name VARCHAR(255),
-    type TINYINT,  -- 0=stock, 1=bond
+    operation_type ENUM('0','1') NOT NULL,
     add_time DATETIME,
     prev_close DECIMAL(10,2),
     price_open DECIMAL(10,2),
