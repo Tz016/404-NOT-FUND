@@ -22,7 +22,6 @@ const addWatchlistItem = async (req, res) => {
             });
         }
 
-
         const watchlistData = {
             Account_id,
             types,
@@ -74,6 +73,38 @@ const searchWatchlistItem = async (req, res) => {
         });
     }
 };
+
+const deleteWatchlistItem = async (req, res) => {
+    try {
+        const { watchId } = req.body;
+        if (!watchId) {
+            return res.status(400).json({
+                success: false,
+                error: 'Watch ID is required'
+            });
+        }
+
+        const affectedRows = await Watchlist.delete(watchId);
+        if (affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'Watchlist item not found'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: { watch_id: watchId }
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+};
+
+
 // const getWatchlistByAccount = async (req, res) => {
 //     try {
 //         const { accountId } = req.params;
@@ -100,37 +131,12 @@ const searchWatchlistItem = async (req, res) => {
 //     }
 // };
 
-// const updateWatchlistItem = async (req, res) => {
-//     try {
-//         const { watchId } = req.params;
-//         const updateData = req.body;
+const updateWatchlistItem = async (req, res) => {
+    // 
+    shares = req.body.shares;
+    
 
-//         // 如果更新了股票代码，获取新的价格
-//         if (updateData.ticker) {
-//             const stockData = await Watchlist.getStockPrice(updateData.ticker);
-//             updateData.last_price = stockData.price;
-//         }
-
-//         const affectedRows = await Watchlist.update(watchId, updateData);
-
-//         if (affectedRows === 0) {
-//             return res.status(404).json({
-//                 success: false,
-//                 error: 'Watchlist item not found'
-//             });
-//         }
-
-//         res.status(200).json({
-//             success: true,
-//             data: { watch_id: watchId, ...updateData }
-//         });
-//     } catch (error) {
-//         res.status(500).json({
-//             success: false,
-//             error: error.message
-//         });
-//     }
-// };
+};
 
 // const deleteWatchlistItem = async (req, res) => {
 //     try {

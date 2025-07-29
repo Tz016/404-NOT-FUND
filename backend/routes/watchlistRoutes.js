@@ -7,10 +7,14 @@ router.post('/add', watchlistController.addWatchlistItem);
 
 router.get('/search',watchlistController.searchWatchlistItem);
 
-router.get('/account/:accountId', watchlistController.getWatchlistByAccount);
+router.put('/delete', watchlistController.deleteWatchlistItem);
 
-router.put('/:watchId', watchlistController.updateWatchlistItem);
+router.put('/update/addTraction', watchlistController.updateWatchlistItem);
 
-router.delete('/:watchId', watchlistController.deleteWatchlistItem);
+// router.get('/account/:accountId', watchlistController.getWatchlistByAccount);
+
+// router.put('/:watchId', watchlistController.updateWatchlistItem);
+
+// router.delete('/:watchId', watchlistController.deleteWatchlistItem);
 
 export default router;

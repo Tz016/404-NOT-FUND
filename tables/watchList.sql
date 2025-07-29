@@ -1,20 +1,23 @@
-CREATE TABLE WatchList (
-    watchlist_id INT AUTO_INCREMENT PRIMARY KEY,
-    account_id INT,
-    stock_ticker VARCHAR(20),
-    stock_name VARCHAR(255),
-    operation_type ENUM('0','1') NOT NULL,
-    add_time DATETIME,
-    prev_close DECIMAL(10,2),
-    price_open DECIMAL(10,2),
-    price_current DECIMAL(10,2),
-    FOREIGN KEY (account_id) REFERENCES Account(account_id)
-);
-
-INSERT INTO WatchList (
-    account_id, stock_ticker, stock_name, type, add_time,
-    prev_close, price_open, price_current
-) VALUES (
-    1, 'AAPL', 'Apple Inc.', 0, NOW(),
-    145.00, 146.00, 147.50
-);
+CREATE TABLE `watchlist` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL COMMENT '关联的账户ID',
+  `symbol` varchar(10) NOT NULL COMMENT '股票代码（如AAPL）',
+  `status` enum('Active','Sold') NOT NULL DEFAULT 'Active' COMMENT '持仓状态',
+  `shares` decimal(15,2) NOT NULL DEFAULT 0 COMMENT '持有股数',
+  `last_price` decimal(15,2) NOT NULL DEFAULT 0 COMMENT '最新市场价格',
+  `ac_share` decimal(15,2) NOT NULL DEFAULT 0 COMMENT '平均成本价（AC/Share）',
+  `total_cost` decimal(15,2) NOT NULL DEFAULT 0 COMMENT '总成本（Shares × AC/Share）',
+  `market_value` decimal(15,2) NOT NULL DEFAULT 0 COMMENT '当前市值（Shares × Last Price）',
+  `tot_div_income` decimal(15,2) NOT NULL DEFAULT 0 COMMENT '累计股息收入',
+  `day_gain_unrl_pct` decimal(10,4) NOT NULL DEFAULT 0 COMMENT '当日未实现盈亏百分比',
+  `day_gain_unrl_amt` decimal(15,2) NOT NULL DEFAULT 0 COMMENT '当日未实现盈亏金额',
+  `tot_gain_unrl_pct` decimal(10,4) NOT NULL DEFAULT 0 COMMENT '总未实现盈亏百分比',
+  `tot_gain_unrl_amt` decimal(15,2) NOT NULL DEFAULT 0 COMMENT '总未实现盈亏金额',
+  `realized_gain_pct` decimal(10,4) NOT NULL DEFAULT 0 COMMENT '已实现盈亏百分比',
+  `realized_gain_amt` decimal(15,2) NOT NULL DEFAULT 0 COMMENT '已实现盈亏金额',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_account_symbol` (`account_id`, `symbol`) COMMENT '同一账户下股票代码唯一',
+  KEY `idx_account_status` (`account_id`, `status`) COMMENT '按账户和状态查询优化'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='股票观察列表';
