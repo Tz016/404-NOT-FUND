@@ -1,6 +1,6 @@
 import db from '../config/db.js'; // Adjust the import based on your file structure
 
-class Watchlist {
+class WatchlistModel {
   static async create(watchlistData) {
     const [result] = await db.query('INSERT INTO watchlist SET ?', watchlistData);
     return result.insertId;
@@ -36,7 +36,7 @@ class Watchlist {
   }
 }
 
-export default Watchlist;
+export default WatchlistModel;
 
 // const db = require('../config/db');
 

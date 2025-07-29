@@ -1,4 +1,5 @@
-import Watchlist from '../models/watchlistModel.js'; // 注意文件扩展名 .js
+import WatchlistModel from '../models/watchlistModel.js'; // 注意文件扩展名 .js
+import transactionModel from '../models/transactionModel.js'; // 注意文件扩展名 .js
 import { stocks } from "stock-api";
 
 const addWatchlistItem = async (req, res) => {
@@ -24,16 +25,15 @@ const addWatchlistItem = async (req, res) => {
 
         const watchlistData = {
             Account_id,
-            types,
             ticker,
             last_price: realTimeData.now,
         };
 
-        const watchId = await Watchlist.create(watchlistData);
+        const watchId = await WatchlistModel.create(watchlistData);
         res.status(201).json({
             success: true,
             data: { watch_id: watchId, ...watchlistData }
-        });
+        }); 
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -54,13 +54,13 @@ const searchWatchlistItem = async (req, res) => {
         const realTimeData = await stocks.tencent.getStock(ticker);
 
         // 查询该ticker是否在watchlist中，如果存在，返回标志位1，否则返回0
-        const watchlistItem = await Watchlist.findById(ticker);
+        const watchlistItem = await WatchlistModel.findById(ticker);
         if (watchlistItem) {
             return res.status(200).json({
                 success: true,
                 data: {
                     watch_id: watchlistItem.watch_id,
-                    exists: true,
+                    exists: 1,
                     last_price: watchlistItem.last_price
                 }
             });
@@ -84,7 +84,7 @@ const deleteWatchlistItem = async (req, res) => {
             });
         }
 
-        const affectedRows = await Watchlist.delete(watchId);
+        const affectedRows = await WatchlistModel.delete(watchId);
         if (affectedRows === 0) {
             return res.status(404).json({
                 success: false,
@@ -105,66 +105,62 @@ const deleteWatchlistItem = async (req, res) => {
 };
 
 
-// const getWatchlistByAccount = async (req, res) => {
-//     try {
-//         const { accountId } = req.params;
-//         const watchlist = await Watchlist.findByAccountId(accountId);
-
-//         // 更新每个项目的实时价格
-//         const updatedWatchlist = await Promise.all(watchlist.map(async item => {
-//             const stockData = await Watchlist.getStockPrice(item.ticker);
-//             return {
-//                 ...item,
-//                 last_price: stockData.price
-//             };
-//         }));
-
-//         res.status(200).json({
-//             success: true,
-//             data: updatedWatchlist
-//         });
-//     } catch (error) {
-//         res.status(500).json({
-//             success: false,
-//             error: error.message
-//         });
-//     }
-// };
-
 const updateWatchlistItem = async (req, res) => {
     // 
+    ticker = req.body.ticker;
     shares = req.body.shares;
-    
+    timestamp = req.body.timestamp;
+    // 
+    const realTimeData = await stocks.tencent.getStock(ticker);
+
+    /* 计算下面指标
+    Date
+    Status 
+    Shares 当前持有股数（支持小数)
+    Last Price 股票最新市场价格
+    AC/Share 每股平均成本（Average Cost） 总成本 / 总买入股数
+    Total Cost ($) 总成本（所有买入支出的总和）
+    Market Value ($) 当前持仓市值
+    Tot Div Income ($) 累计股息收入（持有期间收到的所有股息）
+    Day Gain UNRL (%) 当日股价变动导致的浮动盈亏百分比
+    Day Gain UNRL ($)当日股价变动导致的浮动盈亏金额
+    Tot Gain UNRL (%)持仓总浮动盈亏百分比（相对于成本价）
+    Tot Gain UNRL ($)持仓总浮动盈亏金额
+    Realized Gain (%) 已卖出部分的盈亏百分比
+    Realized Gain ($)已卖出部分的盈亏金额
+     */
+    date = new Date(timestamp).toISOString().split('T')[0]; 
+    Status = 'Open'; 
+    last_price = realTimeData.now; 
+    ac_share = realTimeData.now / shares; 
+    transactionData = {
+        date,
+        Status,
+        ticker,
+        shares,
+        timestamp,
+        last_price,
+        ac_share,
+    }
+    transactionModel.create(transactionData);
+
+     return res.status(200).json({
+        success: true,
+        data: {transactionData}
+    });
+
+
+
+
+
+
 
 };
 
-// const deleteWatchlistItem = async (req, res) => {
-//     try {
-//         const { watchId } = req.params;
-//         const affectedRows = await Watchlist.delete(watchId);
 
-//         if (affectedRows === 0) {
-//             return res.status(404).json({
-//                 success: false,
-//                 error: 'Watchlist item not found'
-//             });
-//         }
-
-//         res.status(200).json({
-//             success: true,
-//             data: { watch_id: watchId }
-//         });
-//     } catch (error) {
-//         res.status(500).json({
-//             success: false,
-//             error: error.message
-//         });
-//     }
-// };
 export default {
     addWatchlistItem,
     searchWatchlistItem,
-    getWatchlistByAccount,
     updateWatchlistItem,
     deleteWatchlistItem
 };
