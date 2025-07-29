@@ -5,7 +5,6 @@ class transactionModel {
     const [result] = await db.query('INSERT INTO transactions SET ?', transactionData);
     return result.insertId;
   }
-
 }
 
 export default transactionModel;

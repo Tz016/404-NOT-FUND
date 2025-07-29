@@ -24,8 +24,9 @@ const addWatchlistItem = async (req, res) => {
         }
 
         const watchlistData = {
-            Account_id,
+            account_id: accountId,
             ticker,
+            symbol: ticker,
             last_price: realTimeData.now,
         };
 
@@ -54,7 +55,7 @@ const searchWatchlistItem = async (req, res) => {
         const realTimeData = await stocks.tencent.getStock(ticker);
 
         // 查询该ticker是否在watchlist中，如果存在，返回标志位1，否则返回0
-        const watchlistItem = await WatchlistModel.findById(ticker);
+        const watchlistItem = await WatchlistModel.findByTicker(ticker);
         if (watchlistItem) {
             return res.status(200).json({
                 success: true,
@@ -76,15 +77,15 @@ const searchWatchlistItem = async (req, res) => {
 
 const deleteWatchlistItem = async (req, res) => {
     try {
-        const { watchId } = req.body;
-        if (!watchId) {
+        const { id } = req.body;
+        if (!id) {
             return res.status(400).json({
                 success: false,
                 error: 'Watch ID is required'
             });
         }
 
-        const affectedRows = await WatchlistModel.delete(watchId);
+        const affectedRows = await WatchlistModel.delete(id);
         if (affectedRows === 0) {
             return res.status(404).json({
                 success: false,
@@ -94,7 +95,7 @@ const deleteWatchlistItem = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            data: { watch_id: watchId }
+            data: { id}
         });
     } catch (error) {
         res.status(500).json({
@@ -129,6 +130,8 @@ const updateWatchlistItem = async (req, res) => {
     Realized Gain (%) 已卖出部分的盈亏百分比
     Realized Gain ($)已卖出部分的盈亏金额
      */
+
+
     date = new Date(timestamp).toISOString().split('T')[0]; 
     Status = 'Open'; 
     last_price = realTimeData.now; 
@@ -141,6 +144,7 @@ const updateWatchlistItem = async (req, res) => {
         timestamp,
         last_price,
         ac_share,
+        
     }
     transactionModel.create(transactionData);
 
@@ -148,12 +152,6 @@ const updateWatchlistItem = async (req, res) => {
         success: true,
         data: {transactionData}
     });
-
-
-
-
-
-
 
 };
 

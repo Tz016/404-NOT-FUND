@@ -11,9 +11,9 @@ class WatchlistModel {
     return rows;
   }
 
-  static async findById(watchId) {
-    const [rows] = await db.query('SELECT * FROM watchlist WHERE watch_id = ?', [watchId]);
-    return rows[0];
+  static async findByTicker(ticker) {
+    const [rows] = await db.query('SELECT * FROM watchlist WHERE ticker = ?', [ticker]);
+    return rows.length > 0 ? rows[0] : null;
   }
 
   static async update(watchId, updateData) {
@@ -21,8 +21,8 @@ class WatchlistModel {
     return result.affectedRows;
   }
 
-  static async delete(watchId) {
-    const [result] = await db.query('DELETE FROM watchlist WHERE watch_id = ?', [watchId]);
+  static async delete(id) {
+    const [result] = await db.query('DELETE FROM watchlist WHERE id = ?', [id]);
     return result.affectedRows;
   }
 

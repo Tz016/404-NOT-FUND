@@ -5,7 +5,7 @@ import watchlistController from '../controllers/watchlistController.js'; // Adju
 
 /**
  * @swagger
- * /api/watchlist:
+ * /watchlist/add:
  *   post:
  *     summary: 添加股票到观察列表
  *     description: 将指定股票添加到用户的观察列表，并获取实时价格
@@ -93,7 +93,7 @@ router.post('/add', watchlistController.addWatchlistItem);
 
 /**
  * @swagger
- * /api/watchlist/search:
+ * /watchlist/search:
  *   get:
  *     summary: 搜索观察列表中的股票
  *     description: 根据股票代码查询是否存在于观察列表中，并返回实时价格信息
@@ -165,7 +165,7 @@ router.get('/search', watchlistController.searchWatchlistItem);
 
 /**
  * @swagger
- * /api/watchlist:
+ * /watchlist/delete:
  *   delete:
  *     summary: 从观察列表中删除股票
  *     description: 根据观察项ID从用户的观察列表中删除指定股票
@@ -244,6 +244,52 @@ router.get('/search', watchlistController.searchWatchlistItem);
  */
 router.put('/delete', watchlistController.deleteWatchlistItem);
 
+
 router.put('/update/addTransaction', watchlistController.updateWatchlistItem);
+
+
+// 🎯 饼图数据接口：只返回正收益股票
+router.get('/api/pie-data', async (req, res) => {
+  try {
+    const connection = await mysql.createConnection(dbConfig);
+    const [rows] = await connection.execute(`
+      SELECT symbol, tot_gain_unrl_amt 
+      FROM watchlist 
+      WHERE status = 'Active' AND tot_gain_unrl_amt > 0
+    `);
+
+    const labels = rows.map(row => row.symbol);
+    const values = rows.map(row => row.tot_gain_unrl_amt);
+
+    await connection.end();
+
+    res.json({ labels, values });
+  } catch (err) {
+    console.error('❌ Error fetching pie data:', err);
+    res.status(500).json({ error: 'Failed to fetch pie chart data' });
+  }
+});
+
+// 📊 柱状图数据接口：返回所有 active 持仓股票
+router.get('/api/bar-data', async (req, res) => {
+  try {
+    const connection = await mysql.createConnection(dbConfig);
+    const [rows] = await connection.execute(`
+      SELECT symbol, tot_gain_unrl_amt 
+      FROM watchlist 
+      WHERE status = 'Active'
+    `);
+
+    const labels = rows.map(row => row.symbol);
+    const values = rows.map(row => row.tot_gain_unrl_amt);
+
+    await connection.end();
+
+    res.json({ labels, values });
+  } catch (err) {
+    console.error('❌ Error fetching bar data:', err);
+    res.status(500).json({ error: 'Failed to fetch bar chart data' });
+  }
+});
 
 export default router;
