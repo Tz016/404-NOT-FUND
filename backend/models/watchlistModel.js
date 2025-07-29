@@ -7,12 +7,13 @@ class WatchlistModel {
   }
 
   static async findByAccountId(accountId) {
-    const [rows] = await db.query('SELECT * FROM watchlist WHERE Account_id = ?', [accountId]);
+    const [rows] = await db.query('SELECT * FROM watchlist WHERE account_id = ?', [accountId]);
     return rows;
   }
 
-  static async findByTicker(ticker) {
-    const [rows] = await db.query('SELECT * FROM watchlist WHERE ticker = ?', [ticker]);
+  static async findByTickerAndId(ticker,accountId) {
+    const [rows] = await db.query('SELECT * FROM watchlist WHERE ticker = ? and account_id = ?', [ticker,accountId]);
+    //返回第一个匹配的结果
     return rows.length > 0 ? rows[0] : null;
   }
 
@@ -21,9 +22,14 @@ class WatchlistModel {
     return result.affectedRows;
   }
 
-  static async delete(id) {
-    const [result] = await db.query('DELETE FROM watchlist WHERE id = ?', [id]);
+  static async delete(watchId) {
+    const [result] = await db.query('DELETE FROM watchlist WHERE id = ?', [watchId]);
     return result.affectedRows;
+  }
+
+  static async findOne(ticker, accountId) {
+    const [rows] = await db.query('SELECT * FROM watchlist WHERE ticker = ? AND account_id = ?', [ticker, accountId]);
+    return rows.length > 0 ? rows[0] : null;
   }
 
   static async getStockPrice(ticker) {
@@ -38,58 +44,6 @@ class WatchlistModel {
 
 export default WatchlistModel;
 
-// const db = require('../config/db');
-
-// class Watchlist {
-
-//   // 获取用户的所有WatchList项
-//   static async findByAccountId(accountId) {
-//     const [rows] = await db.query(
-//         'SELECT * FROM watchlist WHERE Account_id = ?', [accountId]
-//     );
-//     return rows;
-//   }
-
-//   // 添加新的WatchList项
-//   static async addTicker(watchItem) {
-//     const { Account_id, shares, types, last_price, total_cost, ticker } = watchItem;
-//     const [result] = await db.query(
-//       'INSERT INTO watchlist (Account_id, shares, types, last_price, total_cost, ticker) VALUES (?, ?, ?, ?, ?, ?)',
-//       [Account_id, shares, types, last_price, total_cost, ticker]
-//     );
-//     return { watch_id: result.insertId, ...watchItem };
-//   }
-
-//   // 更新WatchList项
-//   static async update(watchId, accountId, updates) {
-//     const { shares, types, last_price, total_cost, ticker } = updates;
-//     const [result] = await db.query(
-//       'UPDATE watchlist SET shares = ?, types = ?, last_price = ?, total_cost = ?, ticker = ? WHERE watch_id = ? AND Account_id = ?',
-//       [shares, types, last_price, total_cost, ticker, watchId, accountId]
-//     );
-//     return result.affectedRows > 0;
-//   }
- 
-//   // 删除WatchList项
-//   static async delete(watchId, accountId) {
-//     const [result] = await db.query('DELETE FROM watchlist WHERE watch_id = ? AND Account_id = ?', [watchId, accountId]);
-//     return result.affectedRows > 0;
-//   }
- 
-//   // 获取单个WatchList项
-//   static async findById(watchId, accountId) {
-//     const [rows] = await db.query('SELECT * FROM watchlist WHERE watch_id = ? AND Account_id = ?', [watchId, accountId]);
-//     return rows[0];
-//   }
- 
-//   // 更新股票实时价格
-//   static async updateStockPrice(ticker, newPrice) {
-//     const [result] = await db.query('UPDATE watchlist SET last_price = ? WHERE ticker = ?', [newPrice, ticker]);
-//     return result.affectedRows > 0;
-//   }
-// }
-
-// module.exports = Watchlist;
 
 
 

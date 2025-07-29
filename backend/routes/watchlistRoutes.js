@@ -1,7 +1,8 @@
 import express from 'express';
-const router = express.Router();
+const watchlistRouter = express.Router();
 
 import watchlistController from '../controllers/watchlistController.js'; // Adjust the import based on your file structure
+import { watch } from 'vue';
 
 /**
  * @swagger
@@ -89,79 +90,9 @@ import watchlistController from '../controllers/watchlistController.js'; // Adju
  *                   type: string
  *                   example: "Database connection failed"
  */
-router.post('/add', watchlistController.addWatchlistItem);
+watchlistRouter.post('/add', watchlistController.addWatchlistItem);
 
-/**
- * @swagger
- * /watchlist/search:
- *   get:
- *     summary: 搜索观察列表中的股票
- *     description: 根据股票代码查询是否存在于观察列表中，并返回实时价格信息
- *     tags:
- *       - 观察列表
- *     parameters:
- *       - in: query
- *         name: ticker
- *         schema:
- *           type: string
- *         required: true
- *         description: 要搜索的股票代码
- *         example: "AAPL"
- *     responses:
- *       200:
- *         description: 成功查询股票信息
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   properties:
- *                     watch_id:
- *                       type: integer
- *                       description: 观察项ID(如果存在)
- *                       example: 1
- *                     exists:
- *                       type: boolean
- *                       description: 是否存在于观察列表
- *                       example: true
- *                     last_price:
- *                       type: number
- *                       format: float
- *                       description: 最新价格
- *                       example: 150.25
- *       400:
- *         description: 缺少必要参数或无效请求
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: string
- *                   example: "Ticker symbol is required"
- *       500:
- *         description: 服务器错误
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: string
- *                   example: "Failed to fetch stock data"
- */
-router.get('/search', watchlistController.searchWatchlistItem);
+watchlistRouter.get('/:accountId', watchlistController.getWatchlistItem);
 
 /**
  * @swagger
@@ -242,54 +173,55 @@ router.get('/search', watchlistController.searchWatchlistItem);
  *                   type: string
  *                   example: "Database operation failed"
  */
-router.put('/delete', watchlistController.deleteWatchlistItem);
+watchlistRouter.put('/delete', watchlistController.deleteWatchlistItem);
 
 
-router.put('/update/addTransaction', watchlistController.updateWatchlistItem);
+watchlistRouter.put('/update/addTransaction', watchlistController.updateWatchlistItem);
 
 
-// 🎯 饼图数据接口：只返回正收益股票
-router.get('/api/pie-data', async (req, res) => {
-  try {
-    const connection = await mysql.createConnection(dbConfig);
-    const [rows] = await connection.execute(`
-      SELECT symbol, tot_gain_unrl_amt 
-      FROM watchlist 
-      WHERE status = 'Active' AND tot_gain_unrl_amt > 0
-    `);
 
-    const labels = rows.map(row => row.symbol);
-    const values = rows.map(row => row.tot_gain_unrl_amt);
+// // 🎯 饼图数据接口：只返回正收益股票
+// router.get('/api/pie-data', async (req, res) => {
+//   try {
+//     const connection = await mysql.createConnection(dbConfig);
+//     const [rows] = await connection.execute(`
+//       SELECT symbol, tot_gain_unrl_amt 
+//       FROM watchlist 
+//       WHERE status = 'Active' AND tot_gain_unrl_amt > 0
+//     `);
 
-    await connection.end();
+//     const labels = rows.map(row => row.symbol);
+//     const values = rows.map(row => row.tot_gain_unrl_amt);
 
-    res.json({ labels, values });
-  } catch (err) {
-    console.error('❌ Error fetching pie data:', err);
-    res.status(500).json({ error: 'Failed to fetch pie chart data' });
-  }
-});
+//     await connection.end();
 
-// 📊 柱状图数据接口：返回所有 active 持仓股票
-router.get('/api/bar-data', async (req, res) => {
-  try {
-    const connection = await mysql.createConnection(dbConfig);
-    const [rows] = await connection.execute(`
-      SELECT symbol, tot_gain_unrl_amt 
-      FROM watchlist 
-      WHERE status = 'Active'
-    `);
+//     res.json({ labels, values });
+//   } catch (err) {
+//     console.error('❌ Error fetching pie data:', err);
+//     res.status(500).json({ error: 'Failed to fetch pie chart data' });
+//   }
+// });
 
-    const labels = rows.map(row => row.symbol);
-    const values = rows.map(row => row.tot_gain_unrl_amt);
+// // 📊 柱状图数据接口：返回所有 active 持仓股票
+// router.get('/api/bar-data', async (req, res) => {
+//   try {
+//     const connection = await mysql.createConnection(dbConfig);
+//     const [rows] = await connection.execute(`
+//       SELECT symbol, tot_gain_unrl_amt 
+//       FROM watchlist 
+//       WHERE status = 'Active'
+//     `);
 
-    await connection.end();
+//     const labels = rows.map(row => row.symbol);
+//     const values = rows.map(row => row.tot_gain_unrl_amt);
 
-    res.json({ labels, values });
-  } catch (err) {
-    console.error('❌ Error fetching bar data:', err);
-    res.status(500).json({ error: 'Failed to fetch bar chart data' });
-  }
-});
+//     await connection.end();
 
-export default router;
+//     res.json({ labels, values });
+//   } catch (err) {
+//     console.error('❌ Error fetching bar data:', err);
+//     res.status(500).json({ error: 'Failed to fetch bar chart data' });
+//   }
+// });
+
+export default watchlistRouter;

@@ -2,11 +2,49 @@ import express from 'express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import watchlistRoutes from './routes/watchlistRoutes.js'; 
-
+import stockRoutes from './routes/stockRoutes.js';
+import {Server} from 'socket.io';
+import {createServer} from 'http';
 
 const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: "http://localhost:3002", // 前端地址
+    methods: ["GET", "POST"]
+  }
+});
 
-
+// Socket.IO 连接逻辑
+io.on('connection', (socket) => {
+  console.log(`Client connected: ${socket.id}`);
+ 
+  // 监听客户端订阅请求
+  socket.on('subscribe', (symbol) => {
+    console.log(`Subscribed to ${symbol}`);
+    
+    // 模拟实时推送（实际替换为你的价格获取逻辑）
+    const interval = setInterval(async () => {
+      try {
+        const price = await getStockPrice(symbol); // 使用之前实现的service
+        socket.emit('priceUpdate', { symbol, price });
+      } catch (error) {
+        socket.emit('error', error.message);
+      }
+    }, 3000); // 每3秒推送一次
+ 
+    // 取消订阅时清除定时器
+    socket.on('unsubscribe', () => {
+      clearInterval(interval);
+    });
+ 
+    // 断开连接时清理
+    socket.on('disconnect', () => {
+      clearInterval(interval);
+      console.log(`Client disconnected: ${socket.id}`);
+    });
+  });
+});
 
 // Swagger 配置
 const swaggerOptions = {
@@ -33,7 +71,7 @@ app.use(express.urlencoded({ extended: true })); // 解析 URL 编码的请求�
 
 // 路由
 app.use('/watchlist', watchlistRoutes);
-
+app.use('/stocks', stockRoutes);
 
 // 错误处理
 app.use((err, req, res, next) => {
@@ -44,8 +82,9 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const PORT = 3000;
+httpServer.listen(PORT, () => {
   console.log(`Server running on at http://localhost:${PORT}`);
   console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
+  console.log(`Frontend should connect to http://localhost:3002`);
 });
