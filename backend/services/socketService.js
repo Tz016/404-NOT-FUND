@@ -2,7 +2,7 @@ import { Server } from 'socket.io';
 import {getStockPrice} from '../services/stockService.js';
 import { calculateStockMetrics } from '../services/watchlistService.js';
 import WatchlistModel from '../models/watchlistModel.js'; 
-import { getPieChartData, getBarChartData } from '../services/dataAnalysisService.js';
+import { getPieChartData, getBarChartData,getRoiData } from '../services/dataAnalysisService.js';
 
 
 // 封装 Socket.IO 逻辑
@@ -99,14 +99,16 @@ async function pushStockData(socket, symbol, accountId ,fields) {
 // 推送分析数据
 async function pushAnalysisData(socket) {
   try {
-    const [pieData, barData] = await Promise.all([
+    const [pieData, barData, roiData] = await Promise.all([
       getPieChartData(),
-      getBarChartData()
+      getBarChartData(),
+      getRoiData()  // ✅ 加入 ROI
     ]);
     
     socket.emit('analysisUpdate', {
       pieData,
-      barData
+      barData,
+      roiData  // ✅ 发送给前端
     });
   } catch (error) {
     socket.emit('error', error.message);
