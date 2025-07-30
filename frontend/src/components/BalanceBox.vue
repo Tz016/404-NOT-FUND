@@ -28,22 +28,22 @@ const formattedBalance = computed(() => {
 <style scoped>
 .balance-box {
   background-color: transparent; 
-  height:15vh;
+  height: 15vh;
   width: 60%;
-  margin-top:5vh;
+  margin-top: 5vh;
   padding: 1rem;
   border-radius: 8px;
   text-align: center;
   cursor: pointer;
   color: #fff;
-  transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
 }
 
-.balance-box.active {
-  background-color: #ffd04b;
-  box-shadow: var(--el-border-color-light) 0px 0px 10px;
-  color: #000;
+.balance-box:hover {
+  background: radial-gradient(circle, rgba(255, 208, 75, 0.3) 0%, rgba(255, 208, 75, 0.05) 80%);
+  box-shadow: 0 0 20px rgba(255, 208, 75, 0.3);
 }
+
 
 .label {
   font-size: 1.2rem;

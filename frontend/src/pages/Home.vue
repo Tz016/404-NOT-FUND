@@ -29,6 +29,7 @@ import { ref, onMounted } from 'vue'
 import HomeAsset from '../components/HomeAsset.vue'
 import { useAuthStore } from '../stores/auth'
 
+
 const auth = useAuthStore()
 const assets = ref([])
 const balance = ref(0)
@@ -58,12 +59,20 @@ async function load() {
   //   watchlist.value = wl.data
 }
 
-onMounted(load)
+
+onMounted(async () => {
+  // 先执行 load
+  await load()
+
+  
+})
+
 </script>
 
 <style scoped>
 .home-container {
   padding: 20px;
+  overflow: hidden;
 }
 .login-prompt {
   text-align: center;

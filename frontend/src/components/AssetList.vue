@@ -2,12 +2,12 @@
   <div class="asset-list">
     <el-tabs v-model="activeTab">
       <el-tab-pane label="Stock" name="stock">
-        <!-- <AssetItem
+        <AssetItem
             v-for="item in assets.stock"
             :key="item.bond_id || item.stock_id"
             :asset="item"
             @open="openItem(item, 'stock')"
-          /> -->
+          />
       </el-tab-pane>
 
       <el-tab-pane label="Bond" name="bond">
@@ -27,8 +27,7 @@
       :item="normalizedSelected"
       :type="selectedType"
       :is-asset="true"
-      :inWatchlist="watchlist.has(selectedKey)"
-      @watchlist-change="onWatchlistChange"
+      :inWatchlist="selectedItem.which_table != '1'"
       @trade="onTrade"
     />
   </div>
@@ -36,29 +35,28 @@
 
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onUpdated } from 'vue'
 import AssetItem from './AssetItem.vue'
 import Item from './Item.vue' // 使用你增强后的版本（买/卖/收藏）
 import {bonds} from '../data/bond.js' 
 
 const activeTab = ref('stock')
 
-// 你的 mock 数据保持不变（注意：bond 也用 quantity 字段）
-const assets = {
-  stock: [
-    { name: 'AAPL', price: 189.23, quantity: 10, avgBuyPrice: 180.0 },
-    { name: 'TSLA', price: 254.11, quantity: 5,  avgBuyPrice: 240.0 }
-  ],
+const props = defineProps({
+  assets: { type: Array, required: true } // which_table===2
+});
+
+const assets = computed(() => ({
+  stock: props.assets,
   bond: bonds
-}
+}))
+
 
 const showItem = ref(false)
 const selectedItem = ref(null)
 const selectedType = ref('stock')
 const selectedKey = ref('')
 
-// 示例：初始关注列表（存 key）
-const watchlist = ref(new Set(['AAPL']))
 
 // 点击行，打开弹窗（交给 Item 统一管理）
 function openItem(item, type) {
@@ -78,7 +76,6 @@ const normalizedSelected = computed(() => {
   const it = selectedItem.value
   const t = selectedType.value
   if (!it) return null
-  console.log('Normalized item:', it, t)
   if (t === 'bond') {
     // bond: 让 name 同时作为 issuer 与 bond_id 的占位
     return {
@@ -98,18 +95,12 @@ const normalizedSelected = computed(() => {
       name: it.name,
       price: it.price,
       quantity: it.quantity,
-      avgBuyPrice: it.ac_share,
+      avgBuyPrice: it.ac_share||it.avgBuyPrice,
       currency: 'USD'
     }
   }
 })
 
-function onWatchlistChange(next) {
-  const k = selectedKey.value
-  if (!k) return
-  if (next) watchlist.value.add(k)
-  else watchlist.value.delete(k)
-}
 
 function onTrade({ mode, qty }) {
   // 这里做本地乐观更新（真实项目里可等 API 返回成功后再更新）
