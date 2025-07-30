@@ -101,7 +101,7 @@ const updateWatchlistItem = async (req, res) => {
     const shares = req.body.shares;
     const date = req.body.date;
     const last_price = req.body.last_price;
-    
+    const account_id = req.body.account_id;
     
     /* 
     Status 
@@ -132,10 +132,19 @@ const updateWatchlistItem = async (req, res) => {
         shares,               
         cost_per_share: last_price,  // 数据库字段是 cost_per_share，而你代码里用 last_price
         total_cost,           
-        market_value,         
+        market_value, 
+        account_id,
     };
     // 创建交易记录
-    transactionModel.create(transactionData);
+    const transactionId = await transactionModel.create(transactionData);
+    // 判断创建交易记录是否成功
+    if (transactionId === 0) {
+        return res.status(500).json({
+            success: false,
+            error: 'Failed to create transaction record'
+        });
+    }
+
 
      return res.status(200).json({
         success: true,

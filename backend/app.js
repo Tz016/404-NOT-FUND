@@ -7,6 +7,7 @@ import {Server} from 'socket.io';
 import {createServer} from 'http';
 import {initSocketIO} from './services/socketService.js';
 import accountRoutes from './routes/accountRoutes.js';
+import transactionRoutes from './routes/transacRoutes.js';
 import cors from 'cors';
 
 
@@ -43,6 +44,7 @@ app.use(express.urlencoded({ extended: true })); // 解析 URL 编码的请求�
 app.use('/watchlist', watchlistRoutes);
 app.use('/stocks', stockRoutes);
 app.use('/accounts', accountRoutes);
+app.use('/transactions', transactionRoutes);
 
 // 错误处理
 app.use((err, req, res, next) => {
