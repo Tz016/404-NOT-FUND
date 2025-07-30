@@ -1,4 +1,4 @@
-// test/test.js
+// tests/test.js
 import request from 'supertest';
 import sinon from 'sinon';
 import { expect } from 'chai';
@@ -9,10 +9,9 @@ import WatchlistModel from '../backend/models/watchlistModel.js';
 import transactionModel from '../backend/models/transactionModel.js'; // Still needed if controller uses it
 import yahooFinance from 'yahoo-finance2';
 
-// *** CRITICAL: Import your actual 'app.js' from the backend directory ***
-import mainApp from '../backend/app.js'; // This is your Express app instance
+import mainApp from '../backend/app.js'; // This is the Express app instance
 
-const app = mainApp; // 'app' directly refers to your configured Express app
+const app = mainApp; // 'app' directly refers to the configured Express app
 
 describe('Watchlist API Tests', () => {
   let sandbox;
@@ -30,7 +29,7 @@ describe('Watchlist API Tests', () => {
     it('should add a new watchlist item successfully', async () => {
       const mockTicker = 'AAPL';
       const mockAccountId = 1;
-      const mockQuote = { regularMarketPrice: 150.00 };
+      const mockQuote = { regularMarketPrice: 211.27}; 
       const mockWatchId = 123;
 
       sandbox.stub(yahooFinance, 'quote').resolves(mockQuote);
@@ -179,5 +178,86 @@ describe('Watchlist API Tests', () => {
       expect(res.body.error).to.equal('DB connection error');
     });
   });
-  // Removed PUT /watchlist/update/addTransaction Tests as requested
+  // PUT /watchlist/update/addTransaction Tests
+  // tests/test (replace the existing PUT /watchlist/update/addTransaction block)
+
+  // --- PUT /watchlist/update/addTransaction Tests ---
+  describe('PUT /watchlist/update/addTransaction', () => {
+    // These values will be sent in the request body as per the controller's design
+    const mockTicker = 'TSLA';
+    const mockShares = 10;
+    const mockDate = '2025-07-30';
+    const mockLastPrice = 200.00; 
+    
+    // Calculations as per the controller's logic (for verification in tests)
+    const calculatedAcShare = mockLastPrice / mockShares; 
+    const calculatedTotalCost = mockLastPrice * calculatedAcShare; // Based on controller: last_price * ac_share
+    const calculatedMarketValue = mockLastPrice * mockShares; // Based on controller: last_price * shares
+
+    beforeEach(() => {
+      // Stub transactionModel.create. The controller does NOT await it, but we can still assert it's called.
+      sandbox.stub(transactionModel, 'create').resolves(1); // Simulate successful transaction creation
+    });
+
+    it('should successfully add a transaction and return its data', async () => {
+      const res = await request(app)
+        .put('/watchlist/update/addTransaction')
+        .send({
+          ticker: mockTicker,
+          shares: mockShares,
+          date: mockDate,
+          last_price: mockLastPrice // This is now an input from the request body
+        });
+
+      expect(res.statusCode).to.equal(200);
+      expect(res.body.success).to.be.true;
+      expect(res.body.data).to.have.property('transactionData');
+      
+      const transactionDataResponse = res.body.data.transactionData;
+
+      // Assert the fields as they are structured in the controller's transactionData object
+      expect(transactionDataResponse).to.have.property('date', mockDate);
+      expect(transactionDataResponse).to.have.property('symbol', mockTicker);
+      expect(transactionDataResponse).to.have.property('shares', mockShares);
+      expect(transactionDataResponse).to.have.property('cost_per_share', mockLastPrice);
+      expect(transactionDataResponse).to.have.property('total_cost', calculatedTotalCost);
+      expect(transactionDataResponse).to.have.property('market_value', calculatedMarketValue);
+      // 'Status' and 'ac_share' are calculated but NOT added to the transactionData object in the controller's response, so we don't assert them here.
+
+      // Verify that transactionModel.create was called once
+      expect(transactionModel.create.calledOnce).to.be.true;
+      
+      // Verify the arguments passed to transactionModel.create
+      const createdTransactionArgs = transactionModel.create.getCall(0).args[0];
+      expect(createdTransactionArgs.date).to.equal(mockDate);
+      expect(createdTransactionArgs.symbol).to.equal(mockTicker);
+      expect(createdTransactionArgs.shares).to.equal(mockShares);
+      expect(createdTransactionArgs.cost_per_share).to.equal(mockLastPrice);
+      expect(createdTransactionArgs.total_cost).to.equal(calculatedTotalCost);
+      expect(createdTransactionArgs.market_value).to.equal(calculatedMarketValue);
+      // The `Status` variable in the controller is set to 'Active', but it's not included in `transactionData` for `create` call.
+      // If it should be in the DB, add it to the `transactionData` object in the controller.
+    });
+
+    // Test for when transactionModel.create fails
+    it('should return 500 if an internal server error occurs during transaction creation', async () => {
+      // Override the default stub to simulate a database error
+      transactionModel.create.restore(); // Restore to allow new stub behavior
+      sandbox.stub(transactionModel, 'create').throws(new Error('Database write failed'));
+
+      const res = await request(app)
+        .put('/watchlist/update/addTransaction')
+        .send({
+          ticker: mockTicker,
+          shares: mockShares,
+          date: mockDate,
+          last_price: mockLastPrice
+        });
+
+      expect(res.statusCode).to.equal(500);
+      expect(res.body.success).to.be.false;
+      expect(res.body.error).to.equal('Something broke!'); // Assuming global error handler catches and returns this
+    });
+  });
+    
 });
