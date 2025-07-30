@@ -1,0 +1,23 @@
+CREATE TABLE `watchlist` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL COMMENT '关联的账户ID',
+  `symbol` varchar(10) NOT NULL COMMENT '股票代码（如AAPL）',
+  `status` enum('Active','Sold') NOT NULL DEFAULT 'Active' COMMENT '持仓状态',
+  `shares` decimal(15,2) NOT NULL DEFAULT 0 COMMENT '持有股数',
+  `last_price` decimal(15,2) NOT NULL DEFAULT 0 COMMENT '最新市场价格',
+  `ac_share` decimal(15,2) NOT NULL DEFAULT 0 COMMENT '平均成本价（AC/Share）',
+  `total_cost` decimal(15,2) NOT NULL DEFAULT 0 COMMENT '总成本（Shares × AC/Share）',
+  `market_value` decimal(15,2) NOT NULL DEFAULT 0 COMMENT '当前市值（Shares × Last Price）',
+  `day_gain_unrl_pct` decimal(10,4) NOT NULL DEFAULT 0 COMMENT '当日未实现盈亏百分比',
+  `day_gain_unrl_amt` decimal(15,2) NOT NULL DEFAULT 0 COMMENT '当日未实现盈亏金额',
+  `tot_gain_unrl_pct` decimal(10,4) NOT NULL DEFAULT 0 COMMENT '总未实现盈亏百分比',
+  `tot_gain_unrl_amt` decimal(15,2) NOT NULL DEFAULT 0 COMMENT '总未实现盈亏金额',
+  `which_table` ENUM('0', '1', '2') COMMENT '0 -> Watchlist, 1 -> Asset, 2 -> Both',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_account_symbol` (`account_id`, `symbol`) COMMENT '同一账户下股票代码唯一',
+  KEY `idx_account_status` (`account_id`, `status`) COMMENT '按账户和状态查询优化'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='股票观察列表';
+
+
