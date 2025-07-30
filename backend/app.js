@@ -6,6 +6,7 @@ import stockRoutes from './routes/stockRoutes.js';
 import {Server} from 'socket.io';
 import {createServer} from 'http';
 import {initSocketIO} from './services/socketService.js';
+import accountRoutes from './routes/accountRoutes.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -39,6 +40,7 @@ app.use(express.urlencoded({ extended: true })); // 解析 URL 编码的请求�
 // 路由
 app.use('/watchlist', watchlistRoutes);
 app.use('/stocks', stockRoutes);
+app.use('/accounts', accountRoutes);
 
 // 错误处理
 app.use((err, req, res, next) => {
