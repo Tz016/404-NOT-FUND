@@ -61,6 +61,9 @@
 import { useRouter, useRoute } from 'vue-router'
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from './stores/auth'
+import { usePortfolioStore } from './stores/portfolio'
+
+const portfolioStore = usePortfolioStore()
 
 const router = useRouter()
 const route = useRoute()
@@ -98,8 +101,9 @@ function onLogout() {
   auth.logout()
   drawerVisible.value = false
 }
-onMounted(() => {
+onMounted(async () => {
   window.__PM_EMITTER__?.on('open-auth-drawer', openDrawer)
+  await portfolioStore.refreshPortfolio(100001)
 })
 
 onUnmounted(() => {
