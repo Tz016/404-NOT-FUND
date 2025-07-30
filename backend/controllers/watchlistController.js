@@ -120,8 +120,8 @@ const updateWatchlistItem = async (req, res) => {
      */
 
     const Status = 'Active'; 
-    const ac_share = last_price / shares; 
-    const total_cost = last_price * ac_share;
+    const total_cost = last_price * shares;
+    const ac_share = total_cost / shares;
     const market_value = last_price * shares;
 
 
@@ -135,6 +135,25 @@ const updateWatchlistItem = async (req, res) => {
         market_value, 
         account_id,
     };
+
+    // 更新watchlist
+    const watchlistData = {
+        shares,
+        last_price,
+        ac_share,
+        total_cost,
+        market_value,
+    }
+    // 根据symbol查询watchlistId获得id
+    const data = await WatchlistModel.findBySymbol(symbol,account_id);
+    const watchlistId = await WatchlistModel.update(watchlistData,data.id);
+    if (watchlistId === 0) {
+        return res.status(500).json({
+            success: false,
+            error: 'Failed to update watchlist'
+        });
+    }
+
     // 创建交易记录
     const transactionId = await transactionModel.create(transactionData);
     // 判断创建交易记录是否成功

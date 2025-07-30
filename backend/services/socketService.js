@@ -24,25 +24,30 @@ export const initSocketIO = (httpServer) => {
   io.on('connection', (socket) => {
     console.log(`Client connected: ${socket.id}`);
     const subscriptions = new Map(); // 存储订阅的股票及字段
- 
+
+    // 新增：分析数据定时推送
+    const analysisInterval = setInterval(() => {
+      pushAnalysisData(socket);
+    }, 5000);
+
     // 订阅指定字段
     socket.on('subscribe', async ({ symbol, fields}) => {
       console.log('收到subscribe', symbol, fields);
       if (!subscriptions.has(symbol)) {
         subscriptions.set(symbol, { fields, interval: null });
       }
- 
+
       // 更新订阅字段
       const subscription = subscriptions.get(symbol);
       subscription.fields = fields;
- 
+
       // 如果已有定时器，先清除
       if (subscription.interval) {
         clearInterval(subscription.interval);
       }
 
       // 立即推送一次
-      pushStockData(socket, symbol,fields);
+      pushStockData(socket, symbol, fields);
 
       // 定时推送
       subscription.interval = setInterval(
@@ -50,7 +55,7 @@ export const initSocketIO = (httpServer) => {
         3000
       );
     });
- 
+
     // 取消订阅
     socket.on('unsubscribe', (symbol) => {
       if (subscriptions.has(symbol)) {
@@ -58,10 +63,11 @@ export const initSocketIO = (httpServer) => {
         subscriptions.delete(symbol);
       }
     });
- 
+
     // 断开连接清理
     socket.on('disconnect', () => {
       subscriptions.forEach((sub) => clearInterval(sub.interval));
+      clearInterval(analysisInterval); // 清理分析数据定时器
       console.log(`Client disconnected: ${socket.id}`);
     });
   });
@@ -95,20 +101,21 @@ async function pushStockData(socket, symbol, fields) {
 
 
 // 推送分析数据
-// async function pushAnalysisData(socket) {
-//   try {
-//     const [pieData, barData, roiData] = await Promise.all([
-//       getPieChartData(),
-//       getBarChartData(),
-//       getRoiData()  // ✅ 加入 ROI
-//     ]);
-    
-//     socket.emit('analysisUpdate', {
-//       pieData,
-//       barData,
-//       roiData  // ✅ 发送给前端
-//     });
-//   } catch (error) {
-//     socket.emit('error', error.message);
-//   }
-// }
+async function pushAnalysisData(socket) {
+  try {
+    console.log('推送分析数据');
+    const [pieData, barData, roiData] = await Promise.all([
+      getPieChartData(),
+      getBarChartData(),
+      getRoiData()  // ✅ 加入 ROI
+    ]);
+    console.log('推送分析数据：',pieData,barData,roiData);
+    socket.emit('analysisUpdate', {
+      pieData,
+      barData,
+      roiData  // ✅ 发送给前端
+    });
+  } catch (error) {
+    socket.emit('error', error.message);
+  }
+}

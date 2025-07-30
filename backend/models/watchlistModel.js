@@ -11,6 +11,10 @@ class WatchlistModel {
     const [rows] = await db.query('SELECT * FROM watchlist WHERE account_id = ?', [accountId]);
     return rows;
   }
+  static async findBySymbol(symbol,accountId) {
+    const [rows] = await db.query('SELECT * FROM watchlist WHERE symbol = ? and account_id = ?', [symbol,accountId]);
+    return rows.length > 0 ? rows[0] : null;
+  }
 
   static async findByTickerAndId(ticker,accountId) {
     const [rows] = await db.query('SELECT * FROM watchlist WHERE ticker = ? and account_id = ?', [ticker,accountId]);
@@ -19,8 +23,12 @@ class WatchlistModel {
   }
 
   static async update(updateData,watchId) {
-    const [result] = await db.query('UPDATE watchlist SET ? WHERE id = ?', [updateData, watchId]);
-    return result.affectedRows;
+      // 用更新后的总和计算 ac_share
+      const [result] = await db.query(
+          'UPDATE watchlist SET shares = shares + ?, total_cost = total_cost + ?, ac_share = (total_cost + ?) / (shares + ?) WHERE id = ?',
+          [updateData.shares, updateData.total_cost, updateData.total_cost, updateData.shares, watchId]
+      );
+      return result.affectedRows;
   }
 
   static async destroy(watchId) {
