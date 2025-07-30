@@ -7,10 +7,12 @@ import {Server} from 'socket.io';
 import {createServer} from 'http';
 import {initSocketIO} from './services/socketService.js';
 import accountRoutes from './routes/accountRoutes.js';
+import cors from 'cors';
+
 
 const app = express();
 const httpServer = createServer(app);
-
+app.use(cors());
 // 初始化 Socket.IO
 const io = initSocketIO(httpServer); // 传入 httpServer
 

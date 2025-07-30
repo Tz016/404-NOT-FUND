@@ -19,8 +19,11 @@ export const getPopularStocks = async (n = 10) => {
       'CAT', 'HON', 'GE', 'XOM', 'CVX', 'COP', 'BP', 'T', 'VZ', 'DIS',
       'NFLX', 'TMUS', 'QCOM', 'AVGO', 'TXN', 'PYPL', 'CRM', 'IBM', 'UBER', 'LYFT',
       'SQ'
-  ]
-  
+  ].slice(0, n);
+    //根据n对热门股票进行切片再查询
+    
+    
+
     // 根据批量查询股票信息
     const stockDetailsPromises = popular_stocks.map(symbol => yahooFinance.quote(symbol).catch(err => {
       console.warn(`无法获取股票 ${symbol} 的信息:`, err.message);
