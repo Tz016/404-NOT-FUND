@@ -1,16 +1,23 @@
-CREATE TABLE transaction (
-    transaction_id INT PRIMARY KEY,
-    account_id INT NOT NULL,
-    asset_id INT NOT NULL,
-    buy_in_price DECIMAL(10, 2),
-    selling_price DECIMAL(10, 2),
-    quantity INT NOT NULL,
-    operation_type ENUM('0', '1') NOT NULL,  -- 0 for buy in, 1 for sell
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (account_id) REFERENCES account(account_id),
-    FOREIGN KEY (asset_id) REFERENCES asset(asset_id)
-);
-
-INSERT INTO transaction (transaction_id, account_id, asset_id, buy_in_price, selling_price, quantity, operation_type)
-VALUES (1, 100023, 1, 50.00, NULL, 10, '0');
+CREATE TABLE `transaction` (
+  `id` INT NOT NULL AUTO_INCREMENT COMMENT '交易ID',
+  `date` DATE NOT NULL COMMENT '交易日期',
+  `symbol` VARCHAR(20) NOT NULL COMMENT '股票代码',
+  `shares` DECIMAL(15,6) NOT NULL COMMENT '交易股数',
+  `cost_per_share` DECIMAL(15,2) NOT NULL COMMENT '每股成本(美元)',
+  `total_cost` DECIMAL(15,2) NOT NULL COMMENT '总成本(美元)',
+  `market_value` DECIMAL(15,2) DEFAULT NULL COMMENT '当前市值(美元)',
+  `day_gain_unrl_pct` DECIMAL(10,4) DEFAULT NULL COMMENT '当日未实现盈亏百分比',
+  `day_gain_unrl_amt` DECIMAL(15,2) DEFAULT NULL COMMENT '当日未实现盈亏金额(美元)',
+  `tot_gain_unrl_pct` DECIMAL(10,4) DEFAULT NULL COMMENT '总未实现盈亏百分比',
+  `tot_gain_unrl_amt` DECIMAL(15,2) DEFAULT NULL COMMENT '总未实现盈亏金额(美元)',
+  `ann_gain_pct` DECIMAL(10,4) DEFAULT NULL COMMENT '年度盈亏百分比',
+  `ann_gain_amt` DECIMAL(15,2) DEFAULT NULL COMMENT '年度盈亏金额(美元)',
+  `low_limit` DECIMAL(15,2) DEFAULT NULL COMMENT '股价下限预警',
+  `high_limit` DECIMAL(15,2) DEFAULT NULL COMMENT '股价上限预警',
+  `note` TEXT DEFAULT NULL COMMENT '备注信息',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '记录更新时间',
+  PRIMARY KEY (`id`),
+  INDEX `idx_symbol` (`symbol`),
+  INDEX `idx_date` (`date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='股票交易记录表';

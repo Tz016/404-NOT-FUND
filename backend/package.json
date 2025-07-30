@@ -1,0 +1,22 @@
+{
+  "name": "404-not-fund",
+  "version": "1.0.0",
+  "description": "portfolio-manager/\r ├── backend/\r │   ├── controllers/\r │   ├── routes/\r │   ├── models/\r │   ├── config/\r │   ├── docs/\r │   ├── app.js\r │   ├── server.js\r │   └── package.json    ✅ 后己的依赖放这里\r │\r ├── frontend/           # 可以是 React 或 Vue 项目\r │   ├── public/\r │   ├── src/\r │   └── package.json    ✅ 前端依赖在这里\r │\r ├── tools/              # Python 辅助脚本\r │   ├── mysql_client.py\r │   └── analyze_holdings.py\r │\r ├── docs/               # 项目文档\r │   ├── api-spec.md\r │   ├── database-schema.md\r │   ├── architecture.md\r │   └── user-stories.md\r │\r ├── .gitignore\r ├── README.md           # 说明整个项目、前后端启动方式",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "axios": "^1.11.0",
+    "express": "^5.1.0",
+    "mysql2": "^3.14.2",
+    "socket.io": "^4.8.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "yahoo-finance2": "^2.13.3"
+  }
+}

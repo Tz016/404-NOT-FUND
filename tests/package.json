@@ -1,0 +1,21 @@
+{
+    "name": "404-not-fund-tests",
+    "version": "1.0.0",
+    "description": "Test suite for the personal financial portfolio app",
+    "type": "module",
+    "scripts": {
+        "test": "mocha --require @babel/register --timeout 10000 test"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.28.0",
+        "@babel/preset-env": "^7.28.0",
+        "@babel/register": "^7.27.1",
+        "chai": "^5.2.1",
+        "mocha": "^11.7.1",
+        "sinon": "^21.0.0",
+        "supertest": "^7.1.4"
+    },
+    "dependencies": {
+        "yahoo-finance2": "^2.13.3"
+    }
+}
