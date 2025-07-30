@@ -55,3 +55,5 @@ httpServer.listen(PORT, () => {
   console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
   console.log(`Frontend should connect to http://localhost:3002`);
 });
+
+export default app; // 导出 app 以便在其他地方使用
