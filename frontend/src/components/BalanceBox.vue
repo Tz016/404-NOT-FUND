@@ -46,7 +46,7 @@ const formattedBalance = computed(() => {
 }
 
 .label {
-  font-size: 0.9rem;
+  font-size: 1.2rem;
   margin-bottom: 0.5rem;
   font-weight: bold;
 }

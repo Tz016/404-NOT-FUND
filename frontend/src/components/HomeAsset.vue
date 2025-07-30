@@ -11,6 +11,7 @@
       <el-splitter-panel :min="200">
         <div class="demo-panel">
           <BalanceBox :balance="balance" />
+          <WatchList />
         </div>
       </el-splitter-panel>
     </el-splitter>
@@ -19,7 +20,7 @@
 <script setup>
 import BalanceBox from './BalanceBox.vue' 
 import AssetList from './AssetList.vue'
-
+import WatchList from './WatchList.vue'
 import { ref } from 'vue'
 
 const balance = ref(12345.67) // 模拟账户余额，可以是后端数据
@@ -28,8 +29,9 @@ const balance = ref(12345.67) // 模拟账户余额，可以是后端数据
 .demo-panel {
   display: flex;
   height: 100%;
-  justify-content: center;
+  align-items: center;
   padding: 0;
+  flex-direction: column
 }
 ::v-deep(.el-splitter-bar__dragger-horizontal) {
   background-color: #5b5c5c !important;
@@ -40,5 +42,26 @@ const balance = ref(12345.67) // 模拟账户余额，可以是后端数据
 
 ::v-deep(.el-splitter-bar__trigger) {
   background-color: transparent !important;
+}
+::v-deep(.el-tabs__active-bar) {
+  background-color: #ffd04b; /* 你想要的颜色 */
+}
+::v-deep(.el-tabs__item) {
+  padding: 5px 5px 5px 5px;
+  width:65px;
+  font-size: medium;
+  font-weight: bold;
+  transition: background-color 0.3s;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+::v-deep(.el-tabs__item:hover) {
+  color: #ffd04b;
+}
+::v-deep(.el-tabs__item.is-active) {
+  color: #ffd04b;
+  border-radius: 6px 6px 0 0;
 }
 </style>
