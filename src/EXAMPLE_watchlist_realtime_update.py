@@ -5,7 +5,7 @@ import decimal # Import decimal for precise calculations
 
 # Database connection configuration
 db_config = {
-    'host': '172.22.30.219',
+    'host': '172.22.24.169',
     'port': 3306,
     'user': 'root',
     'password': '123456',
@@ -50,8 +50,8 @@ try:
 
     # Insert new holdings with realistic initial data
     insert_sql = """
-        INSERT INTO watchlist (account_id, symbol, shares, ac_share, total_cost, status, created_at, updated_at)
-        VALUES (%s, %s, %s, %s, %s, %s, NOW(), NOW())
+        INSERT INTO watchlist (account_id, symbol, shares, ac_share, total_cost, status, which_table, created_at, updated_at)
+        VALUES (%s, %s, %s, %s, %s, %s, '2', NOW(), NOW())
     """
     for symbol, data in initial_holdings.items():
         shares = decimal.Decimal(data['shares'])
