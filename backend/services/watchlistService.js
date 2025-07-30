@@ -27,19 +27,6 @@ export const calculateStockMetrics = (stockData) => {
   };
 };
 
-
-  return {
-    dayGainPercent,
-    totalGainDollar,
-    totalGainPercent,
-    dayGainDollar,
-    totGainUnrlAmt,
-    totGainUnrlPct,
-    dayGainUnrlAmt,
-    dayGainUnrlPct,
-  };
-};
-
 // 批量处理股票数据（如果需要）
 export const processWatchlistData = (stocks) => {
   return stocks.map(stock => ({

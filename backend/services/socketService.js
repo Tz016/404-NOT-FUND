@@ -1,5 +1,5 @@
 import { Server } from 'socket.io';
-import getStockPrice from '../services/stockService.js';
+import {getStockPrice} from '../services/stockService.js';
 import { calculateStockMetrics } from '../services/watchlistService.js';
 import WatchlistModel from '../models/watchlistModel.js'; 
 import { getPieChartData, getBarChartData } from '../services/dataAnalysisService.js';
@@ -16,7 +16,7 @@ socket.emit('subscribe', {
 export const initSocketIO = (httpServer) => {
   const io = new Server(httpServer, {
     cors: {
-      origin: "http://localhost:3002",
+      origin: "*",
       methods: ["GET", "POST"]
     }
   });
