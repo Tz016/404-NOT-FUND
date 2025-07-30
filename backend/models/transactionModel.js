@@ -2,7 +2,7 @@ import db from '../config/db.js'; // Adjust the import based on your file struct
 
 class transactionModel {
   static async create(transactionData) {
-    const [result] = await db.query('INSERT INTO transactions SET ?', transactionData);
+    const [result] = await db.query('INSERT INTO transaction SET ?', transactionData);
     return result.insertId;
   }
 }

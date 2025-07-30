@@ -2,6 +2,8 @@ import WatchlistModel from '../models/watchlistModel.js'; // 注意文件扩展�
 import transactionModel from '../models/transactionModel.js'; // 注意文件扩展名 .js
 import yahooFinance from 'yahoo-finance2';
 
+import {getStockPrice} from '../services/stockService.js';
+
 // 添加股票到watchlist
 const addWatchlistItem = async (req, res) => {
     try {
@@ -85,10 +87,11 @@ const deleteWatchlistItem = async (req, res) => {
 
 
 const updateWatchlistItem = async (req, res) => {
-    // 
-    ticker = req.body.ticker;
-    shares = req.body.shares;
-    date = req.body.date;
+    // 入参
+    const ticker = req.body.ticker;
+    const shares = req.body.shares;
+    const date = req.body.date;
+    const last_price = req.body.last_price;
     
     
     /* 
@@ -107,21 +110,21 @@ const updateWatchlistItem = async (req, res) => {
     Realized Gain ($)已卖出部分的盈亏金额   
      */
 
-    Status = 'Active'; 
-    last_price = realTimeData.now; 
-    ac_share = realTimeData.now / shares; 
+    const Status = 'Active'; 
+    const ac_share = last_price / shares; 
+    const total_cost = last_price * ac_share;
+    const market_value = last_price * shares;
 
 
-    transactionData = {
-        date,
-        Status,
-        ticker,
-        shares,
-        timestamp,
-        last_price,
-        ac_share,
 
-    }
+    const transactionData = {
+        date,                  // 对应数据库的 date 字段
+        symbol: ticker,        // 数据库字段是 symbol，而你代码里用 ticker
+        shares,               
+        cost_per_share: last_price,  // 数据库字段是 cost_per_share，而你代码里用 last_price
+        total_cost,           
+        market_value,         
+    };
     // 创建交易记录
     transactionModel.create(transactionData);
 
