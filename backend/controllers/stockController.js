@@ -1,4 +1,19 @@
-import { searchStocks,getStockPrice } from '../services/stockService.js';
+import { searchStocks, getStockPrice, getPopularStocks } from '../services/stockService.js';
+
+export const getPopularStocksHandler = async (req, res) => {
+  try {
+    const count = parseInt(req.query.n) || 10;
+    
+    if (count <= 0 || count > 50) {
+      return res.status(400).json({ error: '参数 n 必须在 1 到 50 之间' });
+    }
+    
+    const popularStocks = await getPopularStocks(count);
+    res.json(popularStocks);
+  } catch (error) {
+    res.status(500).json({ error: error.message || '服务器内部错误' });
+  }
+};
 
 export const searchStocksHandler = async (req, res) => {
   try {

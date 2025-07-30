@@ -1,7 +1,9 @@
 import express from 'express';
-import { searchStocksHandler,getStockPriceHandler } from '../controllers/stockController.js';
+import { searchStocksHandler, getStockPriceHandler, getPopularStocksHandler } from '../controllers/stockController.js';
  
 const router = express.Router();
+
+router.get('/popular', getPopularStocksHandler);
  
 router.get('/search', searchStocksHandler);
 
