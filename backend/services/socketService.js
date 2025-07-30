@@ -26,29 +26,27 @@ export const initSocketIO = (httpServer) => {
     const subscriptions = new Map(); // 存储订阅的股票及字段
  
     // 订阅指定字段
-    socket.on('subscribe', async ({ symbol, fields ,accountId}) => {
+    socket.on('subscribe', async ({ symbol, fields}) => {
+      console.log('收到subscribe', symbol, fields);
       if (!subscriptions.has(symbol)) {
-        subscriptions.set(symbol, { fields,accountId, interval: null  });
+        subscriptions.set(symbol, { fields, interval: null });
       }
  
       // 更新订阅字段
       const subscription = subscriptions.get(symbol);
-      subscription.fields = fields; 
-      subscription.accountId = accountId; // 更新accountId
+      subscription.fields = fields;
  
       // 如果已有定时器，先清除
       if (subscription.interval) {
         clearInterval(subscription.interval);
       }
 
-    // 立即发送一次数据
-      pushAnalysisData(socket);
-      // 立即发送一次数据（避免等待第一个interval）
-      pushStockData(socket, symbol,accountId ,fields);
- 
+      // 立即推送一次
+      pushStockData(socket, symbol,fields);
+
+      // 定时推送
       subscription.interval = setInterval(
-        () => pushAnalysisData(socket),
-        () => pushStockData(socket, symbol,accountId ,fields),
+        () => pushStockData(socket, symbol, fields),
         3000
       );
     });
@@ -72,23 +70,23 @@ export const initSocketIO = (httpServer) => {
 };
 
 // 统一处理数据获取和推送
-async function pushStockData(socket, symbol, accountId ,fields) {
+async function pushStockData(socket, symbol, fields) {
   try {
+    // 获取实时价格
     const realTimeData = await getStockPrice(symbol);
-    const rowData = watchlistModel.findByTickerAndId(symbol, accountId); // 检查是否在watchlist中
-    
-    const { regularMarketPrice } = realTimeData;
-    const {shares , ac_share , total_cost } = rowData;
-    
-    const calculatedData = calculateStockMetrics(regularMarketPrice , shares , ac_share , total_cost); // 使用计算服务
-    
+
+    // 只推送需要的字段
     const filteredData = {};
     fields.split(',').forEach(field => {
-      if (calculatedData[field] !== undefined) { // 现在可以访问计算字段
-        filteredData[field] = calculatedData[field];
+      if (realTimeData[field] !== undefined) {
+        filteredData[field] = realTimeData[field];
       }
     });
- 
+
+    // 日志输出，便于调试
+    console.log(`实时推送股票数据: ${symbol}  ${JSON.stringify(filteredData)}`);
+
+    // 推送给前端
     socket.emit('stockUpdate', { symbol, ...filteredData });
   } catch (error) {
     socket.emit('error', error.message);
@@ -97,20 +95,20 @@ async function pushStockData(socket, symbol, accountId ,fields) {
 
 
 // 推送分析数据
-async function pushAnalysisData(socket) {
-  try {
-    const [pieData, barData, roiData] = await Promise.all([
-      getPieChartData(),
-      getBarChartData(),
-      getRoiData()  // ✅ 加入 ROI
-    ]);
+// async function pushAnalysisData(socket) {
+//   try {
+//     const [pieData, barData, roiData] = await Promise.all([
+//       getPieChartData(),
+//       getBarChartData(),
+//       getRoiData()  // ✅ 加入 ROI
+//     ]);
     
-    socket.emit('analysisUpdate', {
-      pieData,
-      barData,
-      roiData  // ✅ 发送给前端
-    });
-  } catch (error) {
-    socket.emit('error', error.message);
-  }
-}
+//     socket.emit('analysisUpdate', {
+//       pieData,
+//       barData,
+//       roiData  // ✅ 发送给前端
+//     });
+//   } catch (error) {
+//     socket.emit('error', error.message);
+//   }
+// }

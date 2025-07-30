@@ -15,7 +15,8 @@ const app = express();
 const httpServer = createServer(app);
 app.use(cors());
 // 初始化 Socket.IO
-const io = initSocketIO(httpServer); // 传入 httpServer
+initSocketIO(httpServer); // 传入 httpServer
+
 
 // Swagger 配置
 const swaggerOptions = {
@@ -59,7 +60,6 @@ const PORT = 3000;
 httpServer.listen(PORT, () => {
   console.log(`Server running on at http://localhost:${PORT}`);
   console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
-  console.log(`Frontend should connect to http://localhost:3002`);
 });
 
 export default app; // 导出 app 以便在其他地方使用
