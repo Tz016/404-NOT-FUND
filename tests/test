@@ -1,0 +1,183 @@
+// test/test.js
+import request from 'supertest';
+import sinon from 'sinon';
+import { expect } from 'chai';
+
+// *** CRITICAL: Adjust imports to point to the backend folder ***
+import watchlistController from '../backend/controllers/watchlistController.js';
+import WatchlistModel from '../backend/models/watchlistModel.js';
+import transactionModel from '../backend/models/transactionModel.js'; // Still needed if controller uses it
+import yahooFinance from 'yahoo-finance2';
+
+// *** CRITICAL: Import your actual 'app.js' from the backend directory ***
+import mainApp from '../backend/app.js'; // This is your Express app instance
+
+const app = mainApp; // 'app' directly refers to your configured Express app
+
+describe('Watchlist API Tests', () => {
+  let sandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.createSandbox();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  // --- POST /watchlist/add Tests ---
+  describe('POST /watchlist/add', () => {
+    it('should add a new watchlist item successfully', async () => {
+      const mockTicker = 'AAPL';
+      const mockAccountId = 1;
+      const mockQuote = { regularMarketPrice: 150.00 };
+      const mockWatchId = 123;
+
+      sandbox.stub(yahooFinance, 'quote').resolves(mockQuote);
+      sandbox.stub(WatchlistModel, 'findOne').resolves(null);
+      sandbox.stub(WatchlistModel, 'create').resolves(mockWatchId);
+
+      const res = await request(app)
+        .post('/watchlist/add')
+        .send({ ticker: mockTicker, accountId: mockAccountId });
+
+      expect(res.statusCode).to.equal(201);
+      expect(res.body.success).to.be.true;
+      expect(res.body.data).to.have.property('watch_id', mockWatchId);
+      expect(res.body.data).to.have.property('ticker', mockTicker);
+      expect(res.body.data).to.have.property('account_id', mockAccountId);
+      expect(res.body.data).to.have.property('last_price', mockQuote.regularMarketPrice);
+      expect(res.body.data).to.have.property('symbol', mockTicker);
+    });
+
+    it('should return 400 if stock already exists in the watchlist', async () => {
+      const mockTicker = 'GOOG';
+      const mockAccountId = 1;
+      const existingItem = { watch_id: 456, ticker: mockTicker, account_id: mockAccountId };
+
+      sandbox.stub(WatchlistModel, 'findOne').resolves(existingItem);
+
+      const res = await request(app)
+        .post('/watchlist/add')
+        .send({ ticker: mockTicker, accountId: mockAccountId });
+
+      expect(res.statusCode).to.equal(400);
+      expect(res.body.success).to.be.false;
+      expect(res.body.error).to.equal('Stock already exists in the watchlist');
+    });
+
+    it('should return 500 if an internal server error occurs during add', async () => {
+      const mockTicker = 'AMZN';
+      const mockAccountId = 1;
+
+      sandbox.stub(WatchlistModel, 'findOne').throws(new Error('Database error during findOne'));
+
+      const res = await request(app)
+        .post('/watchlist/add')
+        .send({ ticker: mockTicker, accountId: mockAccountId });
+
+      expect(res.statusCode).to.equal(500);
+      expect(res.body.success).to.be.false;
+      expect(res.body.error).to.equal('Database error during findOne');
+    });
+  });
+
+  // --- GET /watchlist/:accountId Tests ---
+  describe('GET /watchlist/:accountId', () => {
+    it('should return watchlist items for a given accountId', async () => {
+      const mockAccountId = 1;
+      const mockWatchlistItems = [
+        { watch_id: 1, account_id: 1, ticker: 'AAPL', last_price: 150.00 },
+        { watch_id: 2, account_id: 1, ticker: 'MSFT', last_price: 300.50 }
+      ];
+
+      sandbox.stub(WatchlistModel, 'findByAccountId').resolves(mockWatchlistItems);
+
+      const res = await request(app)
+        .get(`/watchlist/${mockAccountId}`);
+
+      expect(res.statusCode).to.equal(200);
+      expect(res.body).to.deep.equal(mockWatchlistItems);
+    });
+
+    it('should return an empty array if no watchlist items found for accountId', async () => {
+      const mockAccountId = 99;
+
+      sandbox.stub(WatchlistModel, 'findByAccountId').resolves([]);
+
+      const res = await request(app)
+        .get(`/watchlist/${mockAccountId}`);
+
+      expect(res.statusCode).to.equal(200);
+      expect(res.body).to.deep.equal([]);
+    });
+
+    it('should return 500 if an internal server error occurs during get', async () => {
+      const mockAccountId = 1;
+
+      sandbox.stub(WatchlistModel, 'findByAccountId').throws(new Error('DB error on find'));
+
+      const res = await request(app)
+        .get(`/watchlist/${mockAccountId}`);
+
+      expect(res.statusCode).to.equal(500);
+      expect(res.body).to.have.property('error', 'DB error on find');
+    });
+  });
+
+  // --- PUT /watchlist/delete Tests ---
+  describe('PUT /watchlist/delete', () => {
+    it('should delete a watchlist item successfully', async () => {
+      const mockWatchId = 789;
+
+      sandbox.stub(WatchlistModel, 'delete').resolves(1);
+
+      const res = await request(app)
+        .put('/watchlist/delete')
+        .send({ watchId: mockWatchId });
+
+      expect(res.statusCode).to.equal(200);
+      expect(res.body.success).to.be.true;
+      expect(res.body.data).to.have.property('watchId', mockWatchId);
+    });
+
+    it('should return 404 if watchlist item is not found for deletion', async () => {
+      const mockWatchId = 999;
+
+      sandbox.stub(WatchlistModel, 'delete').resolves(0);
+
+      const res = await request(app)
+        .put('/watchlist/delete')
+        .send({ watchId: mockWatchId });
+
+      expect(res.statusCode).to.equal(404);
+      expect(res.body.success).to.be.false;
+      expect(res.body.error).to.equal('Watchlist item not found');
+    });
+
+    it('should return 400 if watchId is missing for deletion', async () => {
+      const res = await request(app)
+        .put('/watchlist/delete')
+        .send({});
+
+      expect(res.statusCode).to.equal(400);
+      expect(res.body.success).to.be.false;
+      expect(res.body.error).to.equal('watchId is required');
+    });
+
+    it('should return 500 if an internal server error occurs during deletion', async () => {
+      const mockWatchId = 111;
+
+      sandbox.stub(WatchlistModel, 'delete').throws(new Error('DB connection error'));
+
+      const res = await request(app)
+        .put('/watchlist/delete')
+        .send({ watchId: mockWatchId });
+
+      expect(res.statusCode).to.equal(500);
+      expect(res.body.success).to.be.false;
+      expect(res.body.error).to.equal('DB connection error');
+    });
+  });
+  // Removed PUT /watchlist/update/addTransaction Tests as requested
+});
