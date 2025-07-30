@@ -12,6 +12,7 @@ CREATE TABLE `watchlist` (
   `day_gain_unrl_amt` decimal(15,2) NOT NULL DEFAULT 0 COMMENT '当日未实现盈亏金额',
   `tot_gain_unrl_pct` decimal(10,4) NOT NULL DEFAULT 0 COMMENT '总未实现盈亏百分比',
   `tot_gain_unrl_amt` decimal(15,2) NOT NULL DEFAULT 0 COMMENT '总未实现盈亏金额',
+  `which_table` ENUM('0', '1', '2') COMMENT '0 -> Watchlist, 1 -> Asset, 2 -> Both',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
