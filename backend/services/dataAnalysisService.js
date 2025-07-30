@@ -25,3 +25,15 @@ export const getBarChartData = async () => {
   };
 };
 
+// add roi
+export const getRoiData = async () => {
+  const [rows] = await db.execute(`
+    SELECT symbol, (tot_gain_unrl_amt / total_cost) * 100 AS roi
+    FROM watchlist 
+    WHERE status = 'Active' AND total_cost > 0
+  `);
+  return {
+    labels: rows.map(row => row.symbol),
+    values: rows.map(row => parseFloat(row.roi.toFixed(2)))  // 保留两位小数
+  };
+};
