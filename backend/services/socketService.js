@@ -2,7 +2,8 @@ import { Server } from 'socket.io';
 import getStockPrice from '../services/stockService.js';
 import { calculateStockMetrics } from '../services/watchlistService.js';
 import WatchlistModel from '../models/watchlistModel.js'; 
-import { watch } from 'vue';
+import { getPieChartData, getBarChartData } from '../services/dataAnalysisService.js';
+
 
 // 封装 Socket.IO 逻辑
 /*
@@ -39,11 +40,14 @@ export const initSocketIO = (httpServer) => {
       if (subscription.interval) {
         clearInterval(subscription.interval);
       }
- 
+
+    // 立即发送一次数据
+      pushAnalysisData(socket);
       // 立即发送一次数据（避免等待第一个interval）
-      await pushStockData(socket, symbol,accountId ,fields);
+      pushStockData(socket, symbol,accountId ,fields);
  
       subscription.interval = setInterval(
+        () => pushAnalysisData(socket),
         () => pushStockData(socket, symbol,accountId ,fields),
         3000
       );
@@ -86,6 +90,24 @@ async function pushStockData(socket, symbol, accountId ,fields) {
     });
  
     socket.emit('stockUpdate', { symbol, ...filteredData });
+  } catch (error) {
+    socket.emit('error', error.message);
+  }
+}
+
+
+// 推送分析数据
+async function pushAnalysisData(socket) {
+  try {
+    const [pieData, barData] = await Promise.all([
+      getPieChartData(),
+      getBarChartData()
+    ]);
+    
+    socket.emit('analysisUpdate', {
+      pieData,
+      barData
+    });
   } catch (error) {
     socket.emit('error', error.message);
   }
