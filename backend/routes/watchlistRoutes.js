@@ -2,7 +2,7 @@ import express from 'express';
 const watchlistRouter = express.Router();
 
 import watchlistController from '../controllers/watchlistController.js'; // Adjust the import based on your file structure
-import { watch } from 'vue';
+
 
 /**
  * @swagger
