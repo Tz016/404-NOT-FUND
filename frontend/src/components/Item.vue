@@ -25,15 +25,12 @@
 
             <div class="summary-value" v-if="price != null">
                 <div class="label">Current Price</div>
-                  <div
-    class="value"
-    :class="[
-      priceFlash && priceDirection === 'up' ? 'flash-up' : '',
-      priceFlash && priceDirection === 'down' ? 'flash-down' : ''
-    ]"
-  >
-    {{ formattedPrice }}
-  </div>
+                <div class="value" :class="[
+                    priceFlash && priceDirection === 'up' ? 'flash-up' : '',
+                    priceFlash && priceDirection === 'down' ? 'flash-down' : ''
+                ]">
+                    {{ formattedPrice }}
+                </div>
             </div>
             <div class="summary-value" v-if="avgBuyPrice != null">
                 <div class="label">Avg Buy Price</div>
@@ -155,16 +152,16 @@ const socketStore = useSocketStore()
 
 // 打开时订阅
 watch(innerVisible, (visible) => {
-  if (visible) {
-    socketStore.subscribe(props.item.code)
-  } else {
-    socketStore.unsubscribe(props.item.code)
-  }
+    if (visible) {
+        socketStore.subscribe(props.item.code)
+    } else {
+        socketStore.unsubscribe(props.item.code)
+    }
 })
 
 // 获取实时价格（优先 socketStore 的数据）
 const price = computed(() => {
-  return socketStore.prices.get(props.item.code) ?? props.item.price ?? null
+    return socketStore.prices.get(props.item.code) ?? props.item.price ?? null
 })
 ///change!!!
 /* Watchlist */
@@ -186,59 +183,59 @@ const price = computed(() => {
 
 
 watch(price, (newVal, oldVal) => {
-  if (newVal != null && oldVal != null && newVal !== oldVal) {
-    priceDirection.value = newVal > oldVal ? 'up' : 'down'
-    priceFlash.value = true
-    setTimeout(() => {
-      priceFlash.value = false
-      priceDirection.value = null
-    }, 400)
-  }
+    if (newVal != null && oldVal != null && newVal !== oldVal) {
+        priceDirection.value = newVal > oldVal ? 'up' : 'down'
+        priceFlash.value = true
+        setTimeout(() => {
+            priceFlash.value = false
+            priceDirection.value = null
+        }, 400)
+    }
 })
 
 
 const watchlisted = ref(
-  props.item.which_table == '0' || props.item.which_table == '2'
+    props.item.which_table == '0' || props.item.which_table == '2'
 )
 watch(() => props.item.which_table, (val) => {
-  watchlisted.value = val == '0' || val == '2'
+    watchlisted.value = val == '0' || val == '2'
 })
 console.log('props.item', props.item)
 console.log('Watchlisted:', watchlisted.value)
 const watchlistLoading = ref(false)
 async function onToggleWatchlist() {
-  if (watchlistLoading.value) return
-  watchlistLoading.value = true
-  const next = !watchlisted.value
+    if (watchlistLoading.value) return
+    watchlistLoading.value = true
+    const next = !watchlisted.value
 
-  try {
-    let res
-    if (next) {
-      res = await axios.post('http://localhost:3000/watchlist/add', {
-        accountId: 100023,
-        which_table: '0',
-        symbol: props.item.code
-      })
-    } else {
-      res = await axios.put('http://localhost:3000/watchlist/delete', {
-        watchId: props.item.watch_id || props.item.id,
-        which_table: '0',
-        accountId: 100023,
-        symbol: props.item.code
-      })
+    try {
+        let res
+        if (next) {
+            res = await axios.post('http://localhost:3000/watchlist/add', {
+                accountId: 100023,
+                which_table: '0',
+                symbol: props.item.code
+            })
+        } else {
+            res = await axios.put('http://localhost:3000/watchlist/delete', {
+                watchId: props.item.watch_id || props.item.id,
+                which_table: '0',
+                accountId: 100023,
+                symbol: props.item.code
+            })
+        }
+
+        if (res.data?.success) {
+            // 立即本地更新 UI
+            watchlisted.value = next
+
+            // 再刷新全局 portfolio
+            const portfolioStore = usePortfolioStore()
+            await portfolioStore.refreshPortfolio(100023)
+        }
+    } finally {
+        watchlistLoading.value = false
     }
-
-    if (res.data?.success) {
-      // 立即本地更新 UI
-      watchlisted.value = next
-
-      // 再刷新全局 portfolio
-      const portfolioStore = usePortfolioStore()
-      await portfolioStore.refreshPortfolio(100023)
-    }
-  } finally {
-    watchlistLoading.value = false
-  }
 }
 /* Trade form */
 const mode = ref('none') // 'buy' | 'sell' | 'none'
@@ -302,7 +299,7 @@ async function onConfirm() {
                 : Math.max(0, Number(quantity.value) - Number(form.value.qty))
             const portfolioStore = usePortfolioStore()
             await portfolioStore.refreshPortfolio(100023) //single user
-            
+
             closeMode()
         }
     } catch (err) {
@@ -401,9 +398,11 @@ async function mockSell(_payload) { await delay(650); return { ok: true } }
 .kv {
     margin-top: 6px;
 }
+
 .kv ::v-deep(.el-descriptions__label) {
     opacity: 0.6;
 }
+
 /* Buttons */
 
 .accent-btn:disabled {
@@ -416,9 +415,11 @@ async function mockSell(_payload) { await delay(650); return { ok: true } }
     color: #ffd04b !important;
     border: 1px solid #ddd !important;
 }
+
 .sell-btn:hover {
     background: #f5f5f5 !important;
 }
+
 .sell-btn:hover:not(:disabled) {
     background: rgba(255, 208, 75, 0.15);
 }
@@ -552,42 +553,44 @@ async function mockSell(_payload) { await delay(650); return { ok: true } }
     opacity: 0;
     transform: translateY(-6px);
 }
+
 @keyframes flash-up {
-  0% {
-    background-color: #ffeaea;
-    color: #ff4d4f;
-    transform: scale(1.05);
-    border-radius: 4px;
-    padding: 2px 4px;
-  }
-  100% {
-    background-color: transparent;
-    color: inherit;
-    transform: scale(1);
-  }
+    0% {
+        background-color: #ffeaea;
+        color: #ff4d4f;
+        transform: scale(1.05);
+        border-radius: 4px;
+        padding: 2px 4px;
+    }
+
+    100% {
+        background-color: transparent;
+        color: inherit;
+        transform: scale(1);
+    }
 }
 
 @keyframes flash-down {
-  0% {
-    background-color: #e6ffed;
-    color: #52c41a;
-    transform: scale(0.97);
-    border-radius: 4px;
-    padding: 2px 4px;
-  }
-  100% {
-    background-color: transparent;
-    color: inherit;
-    transform: scale(1);
-  }
+    0% {
+        background-color: #e6ffed;
+        color: #52c41a;
+        transform: scale(0.97);
+        border-radius: 4px;
+        padding: 2px 4px;
+    }
+
+    100% {
+        background-color: transparent;
+        color: inherit;
+        transform: scale(1);
+    }
 }
 
 .flash-up {
-  animation: flash-up 0.4s ease;
+    animation: flash-up 0.4s ease;
 }
 
 .flash-down {
-  animation: flash-down 0.4s ease;
+    animation: flash-down 0.4s ease;
 }
-
 </style>
