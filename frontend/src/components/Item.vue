@@ -241,10 +241,11 @@ async function onConfirm() {
 
     try {
         const payload = {
-            ticker: props.item.code,
+            symbol: props.item.code,
             shares: Number(form.value.qty),
             last_price: Number(form.value.price),
-            date: new Date().toISOString()
+            date: new Date().toISOString(),
+            account_id: 100023, // single user
         }
         const res = await axios.put(
             'http://localhost:3000/watchlist/update/addTransaction',
