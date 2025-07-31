@@ -47,7 +47,7 @@ watch(assets, (newAssets) => {
     }))
 }, { immediate: true })
 onMounted(async () => {
-  await portfolioStore.fetchAssets(100001)
+  await portfolioStore.fetchAssets(100023)
 })
 </script>
 <style scoped>

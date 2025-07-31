@@ -209,7 +209,7 @@ const mappedActiveItem = computed(() => {
     ac_share: info ? info.ac_share : null, // 平均买入价
     which_table: info ? info.which_table : null ,
     total_cost: info ? info.total_cost : null, // 总成本
-    created_at: info ? info.created_at : new Date().toISOString(), // 创建时间
+    created_at: info ? info.created_at : new Date().toISOString().split('.')[0], // 创建时间
     last_price: it.regularMarketPrice, // 最新价格
 
   }
