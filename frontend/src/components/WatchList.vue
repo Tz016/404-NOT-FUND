@@ -196,20 +196,20 @@ async function toggleWatchlistItem(item, type) {
        res = await axios.put('http://localhost:3000/watchlist/delete', {
         watchId: item.id,
         which_table: '0',
-        accountId: 100001,
+        accountId: 100023,
         symbol: item.code
       })
     } else {
       // 新增
       res = await axios.post('http://localhost:3000/watchlist/add', {
-        accountId: 100001,
+        accountId: 100023,
         which_table: '0',
         symbol: item.code
       })
     }
     // 刷新 portfolio 数据
     if(res.data.success){
-        await portfolioStore.refreshPortfolio(100001)
+        await portfolioStore.refreshPortfolio(100023)
     }
   } catch (error) {
     console.error('更新 watchlist 出错：', error)
@@ -242,7 +242,7 @@ const normalizedSelected = computed(() => {
 })
 
 onMounted(async () => {
-  await portfolioStore.fetchAssets(100001)
+  await portfolioStore.fetchAssets(100023)
 })
 </script>
 

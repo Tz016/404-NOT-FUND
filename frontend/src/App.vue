@@ -103,7 +103,7 @@ function onLogout() {
 }
 onMounted(async () => {
   window.__PM_EMITTER__?.on('open-auth-drawer', openDrawer)
-  await portfolioStore.refreshPortfolio(100001)
+  await portfolioStore.refreshPortfolio(100023)
 })
 
 onUnmounted(() => {
