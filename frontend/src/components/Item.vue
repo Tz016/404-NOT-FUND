@@ -24,8 +24,16 @@
         <div class="summary">
 
             <div class="summary-value" v-if="price != null">
-                <div class="label">Last Price</div>
-                <div class="value">{{ formattedPrice }}</div>
+                <div class="label">Current Price</div>
+                  <div
+    class="value"
+    :class="[
+      priceFlash && priceDirection === 'up' ? 'flash-up' : '',
+      priceFlash && priceDirection === 'down' ? 'flash-down' : ''
+    ]"
+  >
+    {{ formattedPrice }}
+  </div>
             </div>
             <div class="summary-value" v-if="avgBuyPrice != null">
                 <div class="label">Avg Buy Price</div>
@@ -94,7 +102,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { StarFilled, Star } from '@element-plus/icons-vue'
 import axios from 'axios'
 import { usePortfolioStore } from '../stores/portfolio'
@@ -128,6 +136,12 @@ const holdingsFormatted = computed(() => new Intl.NumberFormat().format(holdings
 const formattedPrice = computed(() => formatCurrency(price.value, currency.value))
 const formattedAvgPrice = computed(() => formatCurrency(avgBuyPrice.value, currency.value))
 
+const priceFlash = ref(false)
+const priceDirection = ref(null) // 'up' | 'down' | null
+
+
+
+
 function formatCurrency(val, cur = 'USD') {
     if (val == null) return '—'
     try {
@@ -152,8 +166,36 @@ watch(innerVisible, (visible) => {
 const price = computed(() => {
   return socketStore.prices.get(props.item.code) ?? props.item.price ?? null
 })
-
+///change!!!
 /* Watchlist */
+
+
+
+
+// // 测试用的 price 模拟（临时替换 socket 的 price 计算）
+// const fakePrice = ref(100)
+// const price = computed(() => fakePrice.value)
+
+// // 每隔 2 秒，随机上涨或下跌
+// onMounted(() => {
+//   setInterval(() => {
+//     const delta = (Math.random() - 0.5) * 5 // [-2.5, +2.5]
+//     fakePrice.value = Math.max(0, (fakePrice.value + delta).toFixed(2))
+//   }, 2000)
+// })
+
+
+watch(price, (newVal, oldVal) => {
+  if (newVal != null && oldVal != null && newVal !== oldVal) {
+    priceDirection.value = newVal > oldVal ? 'up' : 'down'
+    priceFlash.value = true
+    setTimeout(() => {
+      priceFlash.value = false
+      priceDirection.value = null
+    }, 400)
+  }
+})
+
 
 const watchlisted = ref(
   props.item.which_table == '0' || props.item.which_table == '2'
@@ -161,7 +203,7 @@ const watchlisted = ref(
 watch(() => props.item.which_table, (val) => {
   watchlisted.value = val == '0' || val == '2'
 })
-console.log(props.item)
+console.log('props.item', props.item)
 console.log('Watchlisted:', watchlisted.value)
 const watchlistLoading = ref(false)
 async function onToggleWatchlist() {
@@ -276,6 +318,9 @@ function delay(ms) { return new Promise(r => setTimeout(r, ms)) }
 async function mockToggleWatchlist(_item, _next) { await delay(400); return { ok: true } }
 async function mockBuy(_payload) { await delay(650); return { ok: true } }
 async function mockSell(_payload) { await delay(650); return { ok: true } }
+
+
+
 </script>
 
 <style scoped>
@@ -356,7 +401,9 @@ async function mockSell(_payload) { await delay(650); return { ok: true } }
 .kv {
     margin-top: 6px;
 }
-
+.kv ::v-deep(.el-descriptions__label) {
+    opacity: 0.6;
+}
 /* Buttons */
 
 .accent-btn:disabled {
@@ -505,4 +552,42 @@ async function mockSell(_payload) { await delay(650); return { ok: true } }
     opacity: 0;
     transform: translateY(-6px);
 }
+@keyframes flash-up {
+  0% {
+    background-color: #ffeaea;
+    color: #ff4d4f;
+    transform: scale(1.05);
+    border-radius: 4px;
+    padding: 2px 4px;
+  }
+  100% {
+    background-color: transparent;
+    color: inherit;
+    transform: scale(1);
+  }
+}
+
+@keyframes flash-down {
+  0% {
+    background-color: #e6ffed;
+    color: #52c41a;
+    transform: scale(0.97);
+    border-radius: 4px;
+    padding: 2px 4px;
+  }
+  100% {
+    background-color: transparent;
+    color: inherit;
+    transform: scale(1);
+  }
+}
+
+.flash-up {
+  animation: flash-up 0.4s ease;
+}
+
+.flash-down {
+  animation: flash-down 0.4s ease;
+}
+
 </style>

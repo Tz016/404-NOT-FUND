@@ -146,7 +146,6 @@ async function fetchSuggestions(queryString, cb) {
   suggLoading.value = true
   try {
     const { data } = await axios.get(`${API_BASE}/stocks/search`, { params: { query: queryString } })
-    console.log( data )
     const mapped = (Array.isArray(data) ? data : [])
       .filter(x => x.symbol)
       .slice(0, 12)
@@ -191,9 +190,9 @@ const mappedActiveItem = computed(() => {
   if (!activeItem.value) return null
   const it = activeItem.value
   const info=assets.value.find(item =>
-    item.symbol == it.symbol && (item.which_table == 1 || item.which_table == 2)
+    item.symbol == it.symbol
   )
-  if (info){
+  if (info && info.which_table != '0') {
     inAsset.value = true
   }else{
     inAsset.value = false

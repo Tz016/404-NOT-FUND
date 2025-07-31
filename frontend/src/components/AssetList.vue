@@ -75,6 +75,7 @@ function keyOf(item, type) {
 const normalizedSelected = computed(() => {
   const it = selectedItem.value
   const t = selectedType.value
+  console.log(it,'it')
   if (!it) return null
   if (t === 'bond') {
     // bond: 让 name 同时作为 issuer 与 bond_id 的占位
@@ -97,6 +98,7 @@ const normalizedSelected = computed(() => {
       quantity: it.quantity,
       avgBuyPrice: it.ac_share||it.avgBuyPrice,
       currency: 'USD',
+      watch_id: it.watch_id || it.id,
       which_table: it.which_table, // 0: watchlist, 1: asset, 2: both
       ...it
     }

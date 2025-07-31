@@ -43,6 +43,7 @@ watch(assets, (newAssets) => {
       quantity: item.shares,
       avgBuyPrice: item.ac_share,
       currency: 'USD',
+      watch_id: item.id,
       ...item
     }))
 }, { immediate: true })
