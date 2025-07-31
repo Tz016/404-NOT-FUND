@@ -170,7 +170,7 @@ async function onToggleWatchlist() {
     if (next) {
       // ⭐ 新增到 watchlist
       res = await axios.post('http://localhost:3000/watchlist/add', {
-        accountId: 100001,
+        accountId: 100023,
         which_table: '0',     // 0 = watchlist
         symbol: props.item.code
       })
@@ -179,7 +179,7 @@ async function onToggleWatchlist() {
       res = await axios.put('http://localhost:3000/watchlist/delete', {
         watchId: props.item.watch_id || props.item.id,   // watch_id 优先
         which_table: '0',
-        accountId: 100001,
+        accountId: 100023,
         symbol: props.item.code
       })
   
@@ -190,7 +190,7 @@ async function onToggleWatchlist() {
 
       // 刷新 portfolio 数据
       const portfolioStore = usePortfolioStore()
-      await portfolioStore.refreshPortfolio(100001)
+      await portfolioStore.refreshPortfolio(100023)
     }
   } catch (error) {
     console.error('更新 watchlist 出错：', error)
@@ -244,7 +244,7 @@ async function onConfirm() {
             symbol: props.item.code,
             shares: Number(form.value.qty),
             last_price: Number(form.value.price),
-            date: new Date().toISOString(),
+            date: new Date().toISOString().split('.')[0],
             account_id: 100023, // single user
         }
         const res = await axios.put(
@@ -255,7 +255,7 @@ async function onConfirm() {
         if (res.data?.success) {
             // 刷新 portfolio 数据
             const portfolioStore = usePortfolioStore()
-            await portfolioStore.refreshPortfolio(100001) //single user
+            await portfolioStore.refreshPortfolio(100023) //single user
     
             closeMode()
         }

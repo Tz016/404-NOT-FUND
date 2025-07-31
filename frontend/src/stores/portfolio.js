@@ -14,7 +14,7 @@ export const usePortfolioStore = defineStore('portfolio', {
   actions: {
     
     async fetchAccount(accountId) {
-      const res = await axios.get(`http://localhost:3000/accounts/100001`)
+      const res = await axios.get(`http://localhost:3000/accounts/100023`)
       if (res.data?.success) {
         this.account = res.data.data
         this.balance = Number(res.data.data.balance)
