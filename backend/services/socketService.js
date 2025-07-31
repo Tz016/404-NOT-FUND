@@ -1,5 +1,5 @@
 import { Server } from 'socket.io';
-import {getStockPrice} from '../services/stockService.js';
+// import getStockPrice from '../services/stockService.js';
 import { calculateStockMetrics } from '../services/watchlistService.js';
 import WatchlistModel from '../models/watchlistModel.js'; 
 import { getPieChartData, getBarChartData,getRoiData } from '../services/dataAnalysisService.js';
@@ -28,7 +28,8 @@ export const initSocketIO = (httpServer) => {
     // 新增：分析数据定时推送
     const analysisInterval = setInterval(() => {
       pushAnalysisData(socket);
-    }, 5000);
+    }, 10000);
+    
 
     // 订阅指定字段
     socket.on('subscribe', async ({ symbol, fields}) => {
@@ -75,14 +76,30 @@ export const initSocketIO = (httpServer) => {
   return io;
 };
 
+// 在文件顶部维护一个全局价格映射
+const priceMap = {};
+
 // 统一处理数据获取和推送
-async function pushStockData(socket, symbol, fields) {
+function pushStockData(socket, symbol, fields) {
   try {
+    console.log(`推送股票数据: ${symbol} 订阅字段: ${fields}`);
     // 获取实时价格
-    const getStockData = await getStockPrice(symbol);
+    // const getStockData = await getStockPrice(symbol);
+    //使用随机模拟实时价格
+    // 获取上一次价格或初始化
+    let lastPrice = priceMap[symbol] || (80 + Math.random() * 20); // 初始80~100
+    // 生成小幅波动的新价格
+    const change = (Math.random() - 0.5) * 2; // -1 ~ +1
+    const newPrice = Math.max(1, (parseFloat(lastPrice) + change).toFixed(2)); // 不低于1
+    priceMap[symbol] = newPrice; // 更新价格
+
+    const getStockData = {
+      symbol: symbol,
+      regularMarketPrice: newPrice,
+    };
     // 根据symbol查询watchlist表的shares
     const account_id = 100023;
-    const watchlistData = await WatchlistModel.findBySymbol(symbol,account_id);
+    const watchlistData = WatchlistModel.findBySymbol(symbol,account_id);
     const shares = watchlistData.shares;
     const market_value = getStockData.regularMarketPrice * shares;
     const total_cost = watchlistData.total_cost;
@@ -122,14 +139,14 @@ async function pushStockData(socket, symbol, fields) {
 async function pushAnalysisData(socket) {
   try {
     console.log('推送分析数据');
-    const [pieData, barData, roiData] = await Promise.all([
-      getPieChartData(),
+    const [barData, roiData] = await Promise.all([
+      // getPieChartData(),
       getBarChartData(),
       getRoiData()  // ✅ 加入 ROI
     ]);
-    console.log('推送分析数据：',pieData,barData,roiData);
+    console.log('推送分析数据：',barData,roiData);
     socket.emit('analysisUpdate', {
-      pieData,
+      // pieData,
       barData,
       roiData  // ✅ 发送给前端
     });

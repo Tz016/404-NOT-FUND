@@ -1,5 +1,6 @@
 CREATE TABLE `transaction` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT '交易ID',
+  `account_id` INT NOT NULL COMMENT '关联的账户ID',
   `date` DATE NOT NULL COMMENT '交易日期',
   `symbol` VARCHAR(20) NOT NULL COMMENT '股票代码',
   `shares` DECIMAL(15,6) NOT NULL COMMENT '交易股数',
@@ -18,6 +19,7 @@ CREATE TABLE `transaction` (
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '记录更新时间',
   PRIMARY KEY (`id`),
+  FOREIGN KEY (`account_id`) REFERENCES `account`(`account_id`),  
   INDEX `idx_symbol` (`symbol`),
   INDEX `idx_date` (`date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='股票交易记录表';
