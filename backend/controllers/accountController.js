@@ -37,3 +37,27 @@ export const getAccountHandler = async (req, res) => {
     });
   }
 };
+
+
+// 更新账号balance
+export const updateAccountBalanceHandler = async (req, res) => {
+  const { account_id , total_cost} = req.params;
+  
+  const account = await AccountModel.findById(Number(account_id));
+  if (!account) {
+    return res.status(404).json({
+      success: false,
+      error: '账户未找到'
+    });
+  }
+
+  // 更新account表的balance
+  const updateData = {
+    balance: account.balance - total_cost
+  };
+  const accountId = await AccountModel.update(Number(account_id), updateData);
+  res.json({
+    success: true,
+    data: accountId
+  });
+};

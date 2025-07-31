@@ -79,8 +79,26 @@ export const initSocketIO = (httpServer) => {
 async function pushStockData(socket, symbol, fields) {
   try {
     // 获取实时价格
-    const realTimeData = await getStockPrice(symbol);
-
+    const getStockData = await getStockPrice(symbol);
+    // 根据symbol查询watchlist表的shares
+    const account_id = 100023;
+    const watchlistData = await WatchlistModel.findBySymbol(symbol,account_id);
+    const shares = watchlistData.shares;
+    const market_value = getStockData.regularMarketPrice * shares;
+    const total_cost = watchlistData.total_cost;
+    const realized_gain_dollar = market_value - total_cost;
+    const day_gain_unrl_dollar = getStockData.regularMarketPrice - watchlistData.last_price;
+    const day_gain_unrl_percent = (day_gain_unrl_dollar / watchlistData.last_price) * 100;
+    
+    const realTimeData = {
+      ...getStockData,
+      shares,
+      market_value,
+      total_cost,
+      realized_gain_dollar,
+      day_gain_unrl_dollar,
+      day_gain_unrl_percent,
+    }
     // 只推送需要的字段
     const filteredData = {};
     fields.split(',').forEach(field => {

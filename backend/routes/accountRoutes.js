@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAccountHandler } from '../controllers/accountController.js';
+import { getAccountHandler, updateAccountBalanceHandler } from '../controllers/accountController.js';
 
 const router = express.Router();
 
@@ -68,5 +68,7 @@ const router = express.Router();
  *         description: 服务器内部错误
  */
 router.get('/:accountId', getAccountHandler);
+
+router.put('/:accountId', updateAccountBalanceHandler);
 
 export default router;

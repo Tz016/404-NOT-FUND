@@ -1,7 +1,7 @@
 import WatchlistModel from '../models/watchlistModel.js'; // 注意文件扩展名 .js
 import transactionModel from '../models/transactionModel.js'; // 注意文件扩展名 .js
 import yahooFinance from 'yahoo-finance2';
-
+import AccountModel from '../models/accountModel.js';
 import {getStockPrice} from '../services/stockService.js';
 
 
@@ -115,8 +115,6 @@ const updateWatchlistItem = async (req, res) => {
     Day Gain UNRL ($)当日股价变动导致的浮动盈亏金额 (Last Price - 昨日收盘价) × Shares
     Tot Gain UNRL (%)持仓总浮动盈亏百分比（相对于成本价）(Market Value - Total Cost) / Total Cost × 100%
     Tot Gain UNRL ($)持仓总浮动盈亏金额  (Market Value - Total Cost)
-    Realized Gain (%) 已卖出部分的盈亏百分比 
-    Realized Gain ($)已卖出部分的盈亏金额   
      */
 
     const Status = 'Active'; 
@@ -124,51 +122,82 @@ const updateWatchlistItem = async (req, res) => {
     const ac_share = total_cost / shares;
     const market_value = last_price * shares;
 
-
-
     const transactionData = {
         date,                  // 对应数据库的 date 字段
         symbol,        // 数据库字段是 symbol
         shares,               
         cost_per_share: last_price,  // 数据库字段是 cost_per_share，而你代码里用 last_price
         total_cost,           
-        market_value, 
         account_id,
+        market_value
     };
 
     // 更新watchlist
     const watchlistData = {
+        symbol,
+        account_id,
         shares,
         last_price,
         ac_share,
         total_cost,
         market_value,
+        which_table: '1'
     }
     // 根据symbol查询watchlistId获得id
     const data = await WatchlistModel.findBySymbol(symbol,account_id);
-    const watchlistId = await WatchlistModel.update(watchlistData,data.id);
-    if (watchlistId === 0) {
-        return res.status(500).json({
-            success: false,
-            error: 'Failed to update watchlist'
+    if(data === null){ // 表示是第一次购买 不在watlist表中股票
+        // 调用WatchlistModel.add
+        const watchlistId = await WatchlistModel.create(watchlistData);
+        if (watchlistId === 0) {
+            return res.status(500).json({
+                success: false,
+                error: 'Failed to add watchlist'
+            });
+        }
+    }else{ 
+        // 表示已经购买过股票或者加入watchlist了
+        if(data.which_table === '0'){ // 表示已经加入watchlist了需要将which_table更新为2
+            watchlistData.which_table = '2';
+        }
+        // 更新watchlist
+        const watchlistId = await WatchlistModel.update(watchlistData,data.id);
+        if (watchlistId === 0) {
+            return res.status(500).json({
+                success: false,
+                error: 'Failed to update watchlist'
+            });
+        }
+
+        //更新account表的balance
+        const account = await AccountModel.findById(Number(account_id));
+        const updateData = {
+        balance: account.balance - total_cost
+        };
+        const accountId = await AccountModel.update(Number(account_id), updateData);
+        if (accountId === 0) {
+            return res.status(500).json({
+                success: false,
+                error: 'Failed to update account balance'
+            });
+        }
+        // 创建交易记录
+        const transactionId = await transactionModel.create(transactionData);
+        // 判断创建交易记录是否成功
+        if (transactionId === 0) {
+            return res.status(500).json({
+                success: false,
+                error: 'Failed to create transaction record'
+            });
+        }
+
+
+        return res.status(200).json({
+            success: true,
+            data: {transactionData}
         });
     }
-
-    // 创建交易记录
-    const transactionId = await transactionModel.create(transactionData);
-    // 判断创建交易记录是否成功
-    if (transactionId === 0) {
-        return res.status(500).json({
-            success: false,
-            error: 'Failed to create transaction record'
-        });
-    }
-
-
-     return res.status(200).json({
-        success: true,
-        data: {transactionData}
-    });
+    
+    
 
 };
 
