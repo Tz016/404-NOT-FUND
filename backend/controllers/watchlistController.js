@@ -4,29 +4,29 @@ import yahooFinance from 'yahoo-finance2';
 
 import {getStockPrice} from '../services/stockService.js';
 
-// 添加股票到watchlist
+
 const addWatchlistItem = async (req, res) => {
     try {
-        const { ticker, types, accountId } = req.body;
+        const { symbol,  accountId ,which_table} = req.body;
 
         // 检查股票是否已存在于watchlist中
-        const existingItem = await WatchlistModel.findOne( ticker, accountId );
-        if (existingItem) {
+        const existingItem = await WatchlistModel.findOne( symbol, accountId );
+        if (existingItem != null && existingItem.which_table === which_table) {
             return res.status(400).json({
                 success: false,
-                error: 'Stock already exists in the watchlist'
+                error: 'Stock already exists in '+ 'table:'+ existingItem.which_table,
             });
         }
 
-        // 根据ticker获取实时价格
-        const quote = await yahooFinance.quote(ticker);
-        console.log(`${ticker} last_price: ${quote.regularMarketPrice}`);
+        // 根据symbol获取实时价格
+        const quote = await yahooFinance.quote(symbol);
+        console.log(`${symbol} last_price: ${quote.regularMarketPrice}`);
         
 
         const watchlistData = {
             account_id: accountId,
-            ticker,
-            symbol: ticker,
+            symbol,
+            which_table,
             last_price: quote.regularMarketPrice,
         };
 
@@ -35,6 +35,7 @@ const addWatchlistItem = async (req, res) => {
             success: true,
             data: { watch_id: watchId, ...watchlistData }
         }); 
+
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -57,7 +58,7 @@ const getWatchlistItem = async (req, res) => {
 // 根据watchId删除watchlist项
 const deleteWatchlistItem = async (req, res) => {
     try {
-        const { watchId } = req.body;
+        const { accountId , symbol ,watchId , which_table } = req.body;
         if (!watchId) {
             return res.status(400).json({
                 success: false,
@@ -65,7 +66,15 @@ const deleteWatchlistItem = async (req, res) => {
             });
         }
 
-        const affectedRows = await WatchlistModel.delete(watchId);
+        // 确保 which_table 是有效的值（0, 1 或 2）
+        if (which_table !== "0" && which_table !== "1" && which_table !== "2") {
+            return res.status(400).json({
+                success: false,
+                error: 'which_table must be 0, 1, or 2'
+            });
+        }
+        const affectedRows = await WatchlistModel.delete(accountId , symbol ,watchId , which_table);
+       
         if (affectedRows === 0) {
             return res.status(404).json({
                 success: false,
@@ -88,7 +97,7 @@ const deleteWatchlistItem = async (req, res) => {
 
 const updateWatchlistItem = async (req, res) => {
     // 入参
-    const ticker = req.body.ticker;
+    const symbol = req.body.symbol;
     const shares = req.body.shares;
     const date = req.body.date;
     const last_price = req.body.last_price;
@@ -119,7 +128,7 @@ const updateWatchlistItem = async (req, res) => {
 
     const transactionData = {
         date,                  // 对应数据库的 date 字段
-        symbol: ticker,        // 数据库字段是 symbol，而你代码里用 ticker
+        symbol,        // 数据库字段是 symbol
         shares,               
         cost_per_share: last_price,  // 数据库字段是 cost_per_share，而你代码里用 last_price
         total_cost,           
