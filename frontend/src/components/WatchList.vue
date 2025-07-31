@@ -237,7 +237,10 @@ const normalizedSelected = computed(() => {
     quantity: it.shares,
     avgBuyPrice: it.ac_share,
     currency: 'USD',
-    created_at: it.created_at
+    created_at: it.created_at,
+    watch_id: it.watch_id || it.id,
+    which_table: it.which_table, // 0: watchlist, 1: asset, 2: both
+    ...it
   }
 })
 
