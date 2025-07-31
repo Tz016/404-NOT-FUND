@@ -210,7 +210,7 @@ const mappedActiveItem = computed(() => {
     total_cost: info ? info.total_cost : null, // 总成本
     created_at: info ? info.created_at : new Date().toISOString().split('.')[0], // 创建时间
     last_price: it.regularMarketPrice, // 最新价格
-    watch_id:info.watch_id||info.id, // 统一使用 watch_id 或 id
+    watch_id: info ? info.watch_id || info.id : null, // 统一使用 watch_id 或 id
 
   }
 })
