@@ -2,34 +2,19 @@
   <div class="asset-list">
     <el-tabs v-model="activeTab">
       <el-tab-pane label="Stock" name="stock">
-        <AssetItem
-            v-for="item in assets.stock"
-            :key="item.bond_id || item.stock_id"
-            :asset="item"
-            @open="openItem(item, 'stock')"
-          />
+        <AssetItem v-for="item in assets.stock" :key="item.bond_id || item.stock_id" :asset="item"
+          @open="openItem(item, 'stock')" />
       </el-tab-pane>
 
       <el-tab-pane label="Bond" name="bond">
-          <AssetItem
-            v-for="item in assets.bond"
-            :key="item.bond_id || item.stock_id"
-            :asset="item"
-            @open="openItem(item, 'bond')"
-          />
+        <AssetItem v-for="item in assets.bond" :key="item.bond_id || item.stock_id" :asset="item"
+          @open="openItem(item, 'bond')" />
       </el-tab-pane>
     </el-tabs>
 
     <!-- 控制 Item.vue 弹窗 -->
-    <Item
-      v-if="selectedItem"
-      v-model:visible="showItem"
-      :item="normalizedSelected"
-      :type="selectedType"
-      :is-asset="true"
-      :in-watchlist="selectedItem.which_table != '1'"
-      @trade="onTrade"
-    />
+    <Item v-if="selectedItem" v-model:visible="showItem" :item="normalizedSelected" :type="selectedType"
+      :is-asset="true" :in-watchlist="selectedItem.which_table != '1'" @trade="onTrade" />
   </div>
 </template>
 
@@ -38,7 +23,7 @@
 import { ref, computed, onUpdated } from 'vue'
 import AssetItem from './AssetItem.vue'
 import Item from './Item.vue' // 使用你增强后的版本（买/卖/收藏）
-import {bonds} from '../data/bond.js' 
+import { bonds } from '../data/bond.js'
 
 const activeTab = ref('stock')
 
@@ -75,7 +60,7 @@ function keyOf(item, type) {
 const normalizedSelected = computed(() => {
   const it = selectedItem.value
   const t = selectedType.value
-  console.log(it,'it')
+  console.log(it, 'it')
   if (!it) return null
   if (t === 'bond') {
     // bond: 让 name 同时作为 issuer 与 bond_id 的占位
@@ -92,11 +77,11 @@ const normalizedSelected = computed(() => {
   } else {
     // stock
     return {
-      code: it.stock_id||it.symbol,                 // 示例中你没有 code/ticker，先用 name 代替
+      code: it.stock_id || it.symbol,                 // 示例中你没有 code/ticker，先用 name 代替
       name: it.name,
       price: it.price,
       quantity: it.quantity,
-      avgBuyPrice: it.ac_share||it.avgBuyPrice,
+      avgBuyPrice: it.ac_share || it.avgBuyPrice,
       currency: 'USD',
       watch_id: it.watch_id || it.id,
       which_table: it.which_table, // 0: watchlist, 1: asset, 2: both
@@ -118,7 +103,8 @@ function onTrade({ mode, qty }) {
 
 <style scoped>
 .asset-list {
-  padding: 1rem; /* 控制 AssetList 到 panel 的边距 */
+  padding: 1rem;
+  /* 控制 AssetList 到 panel 的边距 */
   width: 90%;
   color: white;
 }

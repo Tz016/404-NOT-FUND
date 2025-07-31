@@ -1,15 +1,8 @@
 <template>
   <!-- <pre>{{ hasAvgCost }} {{ hasLastPrice }} {{ direction }}</pre> -->
 
-  <div
-    class="asset-item"
-    role="button"
-    tabindex="0"
-    :aria-label="ariaLabel"
-    @click="open"
-    @keydown.enter.prevent="open"
-    @keydown.space.prevent="open"
-  >
+  <div class="asset-item" role="button" tabindex="0" :aria-label="ariaLabel" @click="open" @keydown.enter.prevent="open"
+    @keydown.space.prevent="open">
     <!-- 顶部行：左 ID+Name，中 Price，右 盈亏 + 角标 -->
     <div class="top-row">
       <div class="left">
@@ -34,16 +27,11 @@
             ({{ pnlSign }}{{ fmtPercent(Math.abs(pnlPct)) }})
           </span>
           <!-- 右上角小三角（相对均价 ac_share） -->
-        <span
-          v-if="hasAvgCost && hasLastPrice && direction !== 'flat'"
-          class="arrow"
-          :class="direction"
-          aria-hidden="true"
-          title="vs avg buy price"
-        />
+          <span v-if="hasAvgCost && hasLastPrice && direction !== 'flat'" class="arrow" :class="direction"
+            aria-hidden="true" title="vs avg buy price" />
         </div>
 
-        
+
       </div>
     </div>
 
@@ -123,7 +111,7 @@ const unrlPctFromApi = computed(() => toNum(props.asset.tot_gain_unrl_pct))
 
 const pnlAmt = computed(() => {
   // 优先使用后端给的未实现盈亏金额，否则计算：(last - avg)*qty
-  if (isFiniteNumber(unrlAmtFromApi.value) && unrlAmtFromApi.value!=0) return unrlAmtFromApi.value
+  if (isFiniteNumber(unrlAmtFromApi.value) && unrlAmtFromApi.value != 0) return unrlAmtFromApi.value
   if (hasAvgCost.value && hasLastPrice.value && isFiniteNumber(quantity.value)) {
     return (lastPrice.value - avgCost.value) * quantity.value
   }
@@ -241,7 +229,8 @@ function fmtPercent(v) {
 }
 
 .top-row {
-  grid-template-columns: 1fr auto auto; /* 左 中 右 */
+  grid-template-columns: 1fr auto auto;
+  /* 左 中 右 */
   column-gap: 12px;
 }
 
@@ -255,13 +244,16 @@ function fmtPercent(v) {
 .left {
   display: flex;
   flex-direction: column;
-  min-width: 0; /* 允许文本省略 */
+  min-width: 0;
+  /* 允许文本省略 */
 }
+
 .id {
   margin: 0;
   font-size: 0.78rem;
   color: var(--muted);
 }
+
 .name {
   margin: 0;
   line-height: 1.25;
@@ -269,6 +261,7 @@ function fmtPercent(v) {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .ticker {
   font-weight: 500;
   opacity: 0.85;
@@ -279,11 +272,13 @@ function fmtPercent(v) {
   text-align: center;
   min-width: 120px;
 }
+
 .mid .label {
   margin: 0;
   font-size: 0.75rem;
   color: var(--muted);
 }
+
 .mid .price {
   margin: 0;
   font-size: 1.05rem;
@@ -297,31 +292,52 @@ function fmtPercent(v) {
   justify-self: end;
   text-align: right;
 }
+
 .pnl {
   font-variant-numeric: tabular-nums;
 }
-.pnl.pos { color: var(--green); }
-.pnl.neg { color: var(--red); }
-.pnl.neutral { color: var(--muted); }
-.pnl-amt { font-weight: 600; }
-.pnl-pct { margin-left: 6px; opacity: 0.9; }
+
+.pnl.pos {
+  color: var(--green);
+}
+
+.pnl.neg {
+  color: var(--red);
+}
+
+.pnl.neutral {
+  color: var(--muted);
+}
+
+.pnl-amt {
+  font-weight: 600;
+}
+
+.pnl-pct {
+  margin-left: 6px;
+  opacity: 0.9;
+}
 
 /* 右上角箭头 */
 .arrow {
   position: absolute;
   top: -40%;
   right: -2px;
-  width: 0.5vw; 
+  width: 0.5vw;
   height: 0.5vh;
 }
+
 .arrow.up {
 
-  background: red; /* 调试 */
+  background: red;
+  /* 调试 */
 }
-.arrow.flat{
+
+.arrow.flat {
 
   background-color: yellow;
 }
+
 .arrow.down {
 
   background-color: #16a34a;
@@ -334,6 +350,12 @@ function fmtPercent(v) {
   margin: 0;
   font-size: 0.9rem;
 }
-.kv .k { color: var(--muted); }
-.kv .v { font-variant-numeric: tabular-nums; }
+
+.kv .k {
+  color: var(--muted);
+}
+
+.kv .v {
+  font-variant-numeric: tabular-nums;
+}
 </style>
