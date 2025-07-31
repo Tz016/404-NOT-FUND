@@ -147,7 +147,7 @@ watch(
       price: item.last_price,
       quantity: item.shares,
       avgBuyPrice: item.ac_share,
-      watch_id: item.watch_id,
+      watch_id: item.watch_id||item.id,
       which_table: item.which_table,
       ...item
     }))
@@ -182,7 +182,7 @@ function isActive(item) {
 
 function isInWatchlist(item) {
   // which_table = 0 或 2 表示在 watchlist
-  return item.which_table === '0' || item.which_table === '2'
+  return item.which_table == '0' || item.which_table == '2'
 }
 
 /**
