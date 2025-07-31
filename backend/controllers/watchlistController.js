@@ -7,34 +7,47 @@ import {getStockPrice} from '../services/stockService.js';
 
 const addWatchlistItem = async (req, res) => {
     try {
-        const { symbol,  accountId ,which_table} = req.body;
+        let { symbol,  accountId ,which_table} = req.body;
 
         // 检查股票是否已存在于watchlist中
         const existingItem = await WatchlistModel.findOne( symbol, accountId );
-        if (existingItem != null && existingItem.which_table === which_table) {
+        if (existingItem != null && existingItem.which_table === which_table || existingItem != null && existingItem.which_table === "2") {
             return res.status(400).json({
                 success: false,
                 error: 'Stock already exists in '+ 'table:'+ existingItem.which_table,
             });
-        }
+        } 
+
+        
 
         // 根据symbol获取实时价格
         const quote = await yahooFinance.quote(symbol);
         console.log(`${symbol} last_price: ${quote.regularMarketPrice}`);
         
+        if(existingItem != null && existingItem.which_table !== which_table){
+            which_table = "2";
+            const watchId = await WatchlistModel.updateWhichTable(which_table,existingItem.id);
+            if(watchId === 0){
+                return res.status(500).json({
+                    success: false,
+                    error: 'Failed to update watchlist'
+                });
+            }
+        }
+        if(existingItem == null ){
+            const watchlistData = {
+                account_id: accountId,
+                symbol,
+                which_table , // 0: watchlist, 1: holding, 2: transaction
+                last_price: quote.regularMarketPrice,
+            };
 
-        const watchlistData = {
-            account_id: accountId,
-            symbol,
-            which_table,
-            last_price: quote.regularMarketPrice,
-        };
-
-        const watchId = await WatchlistModel.create(watchlistData);
-        res.status(201).json({
-            success: true,
-            data: { watch_id: watchId, ...watchlistData }
-        }); 
+            const watchId = await WatchlistModel.create(watchlistData);
+            res.status(201).json({
+                success: true,
+                data: { watch_id: watchId, ...watchlistData }
+            }); 
+        }
 
     } catch (error) {
         res.status(500).json({
@@ -158,6 +171,13 @@ const updateWatchlistItem = async (req, res) => {
         // 表示已经购买过股票或者加入watchlist了
         if(data.which_table === '0'){ // 表示已经加入watchlist了需要将which_table更新为2
             watchlistData.which_table = '2';
+            const watchlistId = await WatchlistModel.updateWhichTable(watchlistData.which_table,data.id);
+            if (watchlistId === 0) {
+                return res.status(500).json({
+                    success: false,
+                    error: 'Failed to update watchlist'
+                });
+            }
         }
         // 更新watchlist
         const watchlistId = await WatchlistModel.update(watchlistData,data.id);

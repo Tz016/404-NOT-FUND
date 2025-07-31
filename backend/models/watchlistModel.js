@@ -6,7 +6,13 @@ class WatchlistModel {
     const [result] = await db.query('INSERT INTO watchlist SET ?', watchlistData);
     return result.insertId;
   }
-
+  static async updateWhichTable(which_table,id){
+    const [result] = await db.query(
+      'UPDATE watchlist SET which_table = ? WHERE id = ?',
+      [which_table, id]
+    );
+    return result.affectedRows;
+  }
   static async findByAccountId(accountId) {
     const [rows] = await db.query('SELECT * FROM watchlist WHERE account_id = ?', [accountId]);
     return rows;
