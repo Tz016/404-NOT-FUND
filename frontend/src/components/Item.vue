@@ -47,7 +47,7 @@
         <!-- Trade actions -->
         <div class="actions">
             <el-button class="accent-btn" plain @click="openMode('buy')">Buy</el-button>
-            <el-button class="white-btn" :disabled="!isAsset || holdings <= 0" @click="openMode('sell')">
+            <el-button class="sell-btn" :disabled="!props.isAsset || holdings <= 0" @click="openMode('sell')">
                 Sell
             </el-button>
         </div>
@@ -98,13 +98,16 @@ import { ref, computed, watch } from 'vue'
 import { StarFilled, Star } from '@element-plus/icons-vue'
 import axios from 'axios'
 import { usePortfolioStore } from '../stores/portfolio'
+
+
 const props = defineProps({
     item: { type: Object, required: true },
     type: { type: String, default: 'stock' },
     isAsset: { type: Boolean, default: false },
-    inWatchlist: { type: Boolean, default: false },
+    // inWatchlist: { type: Boolean, default: false },
     visible: { type: Boolean, default: false }
 })
+
 const emit = defineEmits(['update:visible', 'close', 'watchlist-change', 'trade'])
 
 const innerVisible = ref(props.visible)
@@ -116,7 +119,7 @@ const name = computed(() => (props.item.id ? props.item.id + ' - ' : " ") + (pro
 
 
 const currency = computed(() => (props.item?.currency || 'USD').toUpperCase())
-const price = computed(() => props.item?.price ?? null)
+// const price = computed(() => props.item?.price ?? null)
 const avgBuyPrice = computed(() => props.item?.avgBuyPrice ?? null)
 const holdings = computed(() => Number(props.item?.quantity ?? props.item?.shares ?? 0))
 const holdingsFormatted = computed(() => new Intl.NumberFormat().format(holdings.value))
@@ -132,10 +135,31 @@ function formatCurrency(val, cur = 'USD') {
     } catch { return String(val) }
 }
 
+import { useSocketStore } from '../stores/socket'
+
+const socketStore = useSocketStore()
+
+// 打开时订阅
+watch(innerVisible, (visible) => {
+  if (visible) {
+    socketStore.subscribe(props.item.code)
+  } else {
+    socketStore.unsubscribe(props.item.code)
+  }
+})
+
+// 获取实时价格（优先 socketStore 的数据）
+const price = computed(() => {
+  return socketStore.prices.get(props.item.code) ?? props.item.price ?? null
+})
+
 /* Watchlist */
-const watchlisted = ref(
-  props.item.which_table === '0' || props.item.which_table === '2'
-)
+
+const watchlisted=computed(() => {
+    return props.item.which_table == '0' || props.item.which_table == '2'
+})
+console.log(props.item)
+console.log('Watchlisted:', watchlisted.value)
 const watchlistLoading = ref(false)
 async function onToggleWatchlist() {
   if (watchlistLoading.value) return
@@ -336,12 +360,13 @@ async function mockSell(_payload) { await delay(650); return { ok: true } }
 }
 
 .sell-btn {
-    background: transparent;
-    color: var(--accent);
-    border: 1px solid var(--accent);
-    transition: 0.2s;
+    background: #fff !important;
+    color: #ffd04b !important;
+    border: 1px solid #ddd !important;
 }
-
+.sell-btn:hover {
+    background: #f5f5f5 !important;
+}
 .sell-btn:hover:not(:disabled) {
     background: rgba(255, 208, 75, 0.15);
 }

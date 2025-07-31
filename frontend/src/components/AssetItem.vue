@@ -1,4 +1,6 @@
 <template>
+  <!-- <pre>{{ hasAvgCost }} {{ hasLastPrice }} {{ direction }}</pre> -->
+
   <div
     class="asset-item"
     role="button"
@@ -31,9 +33,7 @@
           <span v-if="isFiniteNumber(pnlPct)" class="pnl-pct">
             ({{ pnlSign }}{{ fmtPercent(Math.abs(pnlPct)) }})
           </span>
-        </div>
-
-        <!-- 右上角小三角（相对均价 ac_share） -->
+          <!-- 右上角小三角（相对均价 ac_share） -->
         <span
           v-if="hasAvgCost && hasLastPrice && direction !== 'flat'"
           class="arrow"
@@ -41,6 +41,9 @@
           aria-hidden="true"
           title="vs avg buy price"
         />
+        </div>
+
+        
       </div>
     </div>
 
@@ -306,19 +309,22 @@ function fmtPercent(v) {
 /* 右上角箭头 */
 .arrow {
   position: absolute;
-  top: -2px;
+  top: -40%;
   right: -2px;
-  width: 0; height: 0;
+  width: 0.5vw; 
+  height: 0.5vh;
 }
 .arrow.up {
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-bottom: 9px solid var(--green);
+
+  background: red; /* 调试 */
+}
+.arrow.flat{
+
+  background-color: yellow;
 }
 .arrow.down {
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-top: 9px solid var(--red);
+
+  background-color: #16a34a;
 }
 
 /* 底部：数量与均价 */

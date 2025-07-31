@@ -99,8 +99,8 @@
       v-model:visible="dialogVisible"
       :item="mappedActiveItem"
       :type="'stock'"
-      :is-asset="false"
-      :in-watchlist="false"
+      :is-asset="inAsset"
+      :in-watchlist="inWatchlist"
       @close="onDialogClose"
     />
   </div>
@@ -112,7 +112,11 @@ import axios from 'axios'
 import Item from '../components/Item.vue'
 import { Search, Loading } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { usePortfolioStore } from '../stores/portfolio'
+import { storeToRefs } from 'pinia'
 
+const portfolioStore = usePortfolioStore()
+const { assets } = storeToRefs(portfolioStore)
 const API_BASE = 'http://localhost:3000'
 const searchInput = ref('')
 const suggLoading = ref(false)
@@ -123,7 +127,7 @@ const popularRaw = ref([])
 
 const dialogVisible = ref(false)
 const activeItem = ref(null)
-
+const inAsset = ref(false)
 async function fetchPopular() {
   loading.value = true
   error.value = ''
@@ -186,12 +190,28 @@ function formatCurrency(val, cur = 'USD') {
 const mappedActiveItem = computed(() => {
   if (!activeItem.value) return null
   const it = activeItem.value
+  const info=assets.value.find(item =>
+    item.symbol == it.symbol && (item.which_table == 1 || item.which_table == 2)
+  )
+  if (info){
+    inAsset.value = true
+  }else{
+    inAsset.value = false
+  }
   return {
     code: it.symbol,
     symbol: it.symbol,
     name: it.longName || it.symbol,
     price: it.regularMarketPrice,
-    currency: it.currency || 'USD'
+    currency: it.currency || 'USD',
+    ...it,
+    shares: info ? info.shares : null, // 从资产中获取持仓
+    ac_share: info ? info.ac_share : null, // 平均买入价
+    which_table: info ? info.which_table : null ,
+    total_cost: info ? info.total_cost : null, // 总成本
+    created_at: info ? info.created_at : new Date().toISOString(), // 创建时间
+    last_price: it.regularMarketPrice, // 最新价格
+
   }
 })
 
