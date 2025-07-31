@@ -27,7 +27,7 @@
       :item="normalizedSelected"
       :type="selectedType"
       :is-asset="true"
-      :inWatchlist="selectedItem.which_table != '1'"
+      :in-watchlist="selectedItem.which_table != '1'"
       @trade="onTrade"
     />
   </div>
@@ -96,7 +96,9 @@ const normalizedSelected = computed(() => {
       price: it.price,
       quantity: it.quantity,
       avgBuyPrice: it.ac_share||it.avgBuyPrice,
-      currency: 'USD'
+      currency: 'USD',
+      which_table: it.which_table, // 0: watchlist, 1: asset, 2: both
+      ...it
     }
   }
 })

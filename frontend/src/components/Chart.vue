@@ -349,5 +349,6 @@ watch(() => [props.balance, props.assets], renderChart, { deep: true });
   justify-content: center;
   align-items: center;
   padding: 12px;
+  margin-top:20px;
 }
 </style>

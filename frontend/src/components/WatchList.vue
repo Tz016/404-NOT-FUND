@@ -102,7 +102,7 @@
       :item="normalizedSelected"
       :type="selectedType"
       :is-asset="true"
-      :inWatchlist="true"
+      :in-watchlist="true"
       @watchlist-change="onWatchlistChange"
       @trade="onTrade"
       @close="clearActive"
@@ -253,8 +253,8 @@ onMounted(async () => {
   width: 100%;
   padding: 0.5rem;
   color: white;
-  margin-top: 10vh;
-  margin-left: 8vw;
+  margin-top: 8vh;
+  margin-left: 12vw;
 }
 
 .watchlist-tabs {
