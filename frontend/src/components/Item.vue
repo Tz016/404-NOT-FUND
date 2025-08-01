@@ -199,6 +199,7 @@ const watchlisted = ref(
 )
 watch(() => props.item.which_table, (val) => {
     console.log('props.item.which_table, watchlisted',props.item.which_table)
+
     watchlisted.value = val == '0' || val == '2'
 })
 console.log('props.item', props.item)
@@ -224,15 +225,18 @@ async function onToggleWatchlist() {
             })
         } else {
             res = await axios.put('https://981c4eefa734.ngrok-free.app/watchlist/delete', {
+
                 watchId: props.item.watch_id || props.item.id,
                 which_table: '0',
                 accountId: 100023,
                 symbol: props.item.code
+
             }, {
                 headers: {
                     'ngrok-skip-browser-warning': 'true',
                     'Accept': 'application/json'
                 }
+
             })
         }
 
@@ -307,6 +311,7 @@ async function onConfirm() {
                     'Accept': 'application/json'
                 }
             }
+
         )
         console.log("交易请求结果:", res)
         if (res.data?.success) {

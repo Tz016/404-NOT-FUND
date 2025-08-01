@@ -4,12 +4,14 @@ import { ref } from 'vue'
 
 export const useSocketStore = defineStore('socket', () => {
   // 1. 建立单例 socket 连接
+
   const socket = io('https://981c4eefa734.ngrok-free.app',
         {headers: {
       'ngrok-skip-browser-warning': 'true',
       'Accept': 'application/json'
     }
     })
+
   // 2. 用 map 来存储不同 symbol 的实时价格
   const prices = ref(new Map())
 

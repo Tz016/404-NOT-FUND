@@ -92,7 +92,9 @@ const openStockSelectModal = async () => {
     else stockOptions.value = []
     // 异步拉取最新
     try {
+
         const res = await fetch('https://981c4eefa734.ngrok-free.app/stocks/popular?n=5')
+
         const data = await res.json()
         if (Array.isArray(data) && data.length > 0) {
             stockOptions.value = data
@@ -120,7 +122,9 @@ function handleSearch(val) {
         isSearching.value = true
         errorMsg.value = ''
         try {
+
             const res = await fetch('https://981c4eefa734.ngrok-free.app/stocks/search?query=' + encodeURIComponent(val))
+
             const data = await res.json()
             if (Array.isArray(data) && data.length > 0) {
                 stockOptions.value = data
@@ -147,7 +151,9 @@ async function handleAddStocks(stocks) {
                 symbol: stock.symbol
             }
             try {
+
                 const res = await fetch('https://981c4eefa734.ngrok-free.app/watchlist/add', {
+
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -191,7 +197,9 @@ async function handleAddShare(item, index) {
     addFormSymbol.value = item.symbol
     addFormInitPrice.value = ''
     try {
+
         const res = await fetch(`https://981c4eefa734.ngrok-free.app/stocks/price/${item.symbol}`)
+
         const data = await res.json()
         if (data && data.regularMarketPrice !== undefined && data.regularMarketPrice !== null) {
             addFormInitPrice.value = data.regularMarketPrice
@@ -215,7 +223,9 @@ function handleAddShareConfirm(shares, price) {
 }
 
 // 1. 建立socket连接
+
 const socket = io('https://981c4eefa734.ngrok-free.app')
+
 
 // 2. 订阅所有已在watchlist中的股票（页面加载时和后续添加）
 watchEffect(() => {
@@ -256,12 +266,14 @@ socket.on('stockUpdate', (data) => {
 
 onMounted(async () => {
     try {
+
         const res = await fetch('https://981c4eefa734.ngrok-free.app/watchlist/100023',
         {headers: {
       'ngrok-skip-browser-warning': 'true',
       'Accept': 'application/json'
     }
     })
+
         const data = await res.json()
         watchlist.splice(0, watchlist.length, ...data.map(item => ({
             symbol: item.symbol,

@@ -44,6 +44,7 @@
             <td>{{ item.totalCost }}</td>
             <td>{{ item.marketValue }}</td>
             <td>{{ item.totDivIncome }}</td>
+
             <td
               :class="{ 'gain': item.dayGainPercent && item.dayGainPercent.includes('+'), 'loss': item.dayGainPercent && item.dayGainPercent.includes('-') }">
               {{ item.dayGainPercent }}
@@ -58,6 +59,7 @@
             </td>
             <td
               :class="{ 'gain': item.totGainAmount && item.totGainAmount.includes('+'), 'loss': item.totGainAmount && item.totGainAmount.includes('-') }">
+
               {{ item.totGainAmount }}
             </td>
             <td>{{ item.realizedGain }}</td>
@@ -268,6 +270,7 @@ table {
   border-collapse: collapse;
 }
 
+
 th,
 td {
   padding: 12px 15px;
@@ -309,9 +312,11 @@ th {
   transition: background 0.2s;
 }
 
+
 .add-share-btn:hover {
   background: #4b018f;
 }
+
 
 .lot-cell {
   background: #f5f6fa;
@@ -350,15 +355,19 @@ th {
   background: #fff;
 }
 
+
 .lot-inner-table th,
 .lot-inner-table td {
+
   padding: 8px 10px;
   border-bottom: 1px solid #e0e3e8;
   font-size: 14px;
 }
 
+
 .lot-confirm-btn,
 .lot-cancel-btn {
+
   padding: 4px 10px;
   border-radius: 6px;
   border: none;
@@ -377,6 +386,7 @@ th {
   color: #333;
 }
 
+
 .lot-confirm-btn:hover {
   background: #4b018f;
 }
@@ -384,6 +394,7 @@ th {
 .lot-cancel-btn:hover {
   background: #ccc;
 }
+
 
 .price-up {
   color: #e53e3e;
@@ -394,6 +405,7 @@ th {
   color: #38a169;
   font-weight: bold;
 }
+
 
 .flash-anim {
   animation: flash-bg 0.6s;
@@ -411,5 +423,6 @@ th {
   100% {
     background: transparent;
   }
+
 }
 </style>

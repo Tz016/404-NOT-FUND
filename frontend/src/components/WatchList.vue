@@ -13,13 +13,16 @@
             <!-- Stock -->
             <el-tab-pane label="Stock" name="stock">
               <transition-group name="list" tag="div">
+
                 <div v-for="item in filteredAssets.stock" :key="'s-' + item.code" class="watch-item"
                   @click="openItemDialog(item, 'stock')" :class="{ active: isActive(item) }">
+
                   <div class="info">
                     <p><strong>{{ item.code }}</strong></p>
                   </div>
 
                   <!-- ⭐ 星星图标 -->
+
                   <el-icon class="star-icon" @click.stop="toggleWatchlistItem(item, 'stock')">
                     <component :is="isInWatchlist(item) ? StarFilled : Star" />
                   </el-icon>
@@ -27,12 +30,14 @@
 
                 <el-button class="add-btn" type="primary" size="medium" @click="goToMarket" color="#ffd04b">+
                   Add</el-button>
+
               </transition-group>
             </el-tab-pane>
 
             <!-- Bond -->
             <el-tab-pane label="Bond" name="bond">
               <transition-group name="list" tag="div">
+
                 <div v-for="item in filteredAssets.bond" :key="'b-' + item.code" class="watch-item"
                   @click="openItemDialog(item, 'bond')" :class="{ active: isActive(item) }">
                   <div class="info">
@@ -44,14 +49,17 @@
                 </div>
 
                 <el-button type="primary" size="medium" @click="goToMarket" color="#ffd04b">+ Add</el-button>
+
               </transition-group>
             </el-tab-pane>
 
             <!-- 搜索框 -->
             <el-tab-pane name="search" disabled>
               <template #label>
+
                 <el-input v-model="searchQuery" placeholder="Search by code..." size="small" clearable
                   style="width: 180px; margin-left: 20px;" />
+
               </template>
             </el-tab-pane>
           </el-tabs>
@@ -59,9 +67,11 @@
       </div>
     </transition>
 
+
     <Item v-if="selectedItem" v-model:visible="showItem" :item="normalizedSelected" :type="selectedType"
       :is-asset="true" :in-watchlist="true" @watchlist-change="onWatchlistChange" @trade="onTrade"
       @close="clearActive" />
+
   </div>
 </template>
 
@@ -102,7 +112,9 @@ watch(
       price: item.last_price,
       quantity: item.shares,
       avgBuyPrice: item.ac_share,
+
       watch_id: item.watch_id || item.id,
+
       which_table: item.which_table,
       ...item
     }))
@@ -144,15 +156,18 @@ function isInWatchlist(item) {
  * ⭐ 切换 watchlist（新增/删除）
  */
 async function toggleWatchlistItem(item, type) {
+
   let res;
   try {
     if (isInWatchlist(item)) {
       // 删除
       res = await axios.put('https://981c4eefa734.ngrok-free.app/watchlist/delete', {
+
         watchId: item.id,
         which_table: '0',
         accountId: 100023,
         symbol: item.code
+
 
       },{headers: {
       'ngrok-skip-browser-warning': 'true',
@@ -177,6 +192,7 @@ async function toggleWatchlistItem(item, type) {
     // 刷新 portfolio 数据
     if (res.data.success) {
       await portfolioStore.refreshPortfolio(100023)
+
     }
   } catch (error) {
     console.error('更新 watchlist 出错：', error)
@@ -249,9 +265,11 @@ onMounted(async () => {
   background-color: #ffd04b;
 }
 
+
 .watch-item:hover .star-icon {
   color: white;
 }
+
 
 .watch-item.active {
   background-color: #ffd04b;
@@ -273,6 +291,7 @@ onMounted(async () => {
   color: white;
 }
 
+
 ::v-deep(.el-tabs__item) {
   width: auto !important;
   /* 自动宽度 */
@@ -287,4 +306,5 @@ onMounted(async () => {
 .arrow:hover {
   font-weight: bolder;
 }
+
 </style>
