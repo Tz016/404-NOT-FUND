@@ -111,7 +111,7 @@ const unrlPctFromApi = computed(() => toNum(props.asset.tot_gain_unrl_pct))
 
 const pnlAmt = computed(() => {
   // 优先使用后端给的未实现盈亏金额，否则计算：(last - avg)*qty
-  if (isFiniteNumber(unrlAmtFromApi.value) && unrlAmtFromApi.value != 0) return unrlAmtFromApi.value
+  // if (isFiniteNumber(unrlAmtFromApi.value) && unrlAmtFromApi.value != 0) return unrlAmtFromApi.value
   if (hasAvgCost.value && hasLastPrice.value && isFiniteNumber(quantity.value)) {
     return (lastPrice.value - avgCost.value) * quantity.value
   }
@@ -120,7 +120,7 @@ const pnlAmt = computed(() => {
 
 const pnlPct = computed(() => {
   // 优先使用后端给的未实现盈亏百分比，否则计算：(last/avg - 1)*100
-  if (isFiniteNumber(unrlPctFromApi.value)) return unrlPctFromApi.value
+  // if (isFiniteNumber(unrlPctFromApi.value)) return unrlPctFromApi.value
   if (hasAvgCost.value && hasLastPrice.value && avgCost.value !== 0) {
     return ((lastPrice.value / avgCost.value) - 1) * 100
   }
