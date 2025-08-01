@@ -106,7 +106,7 @@ const watchlist = ref({
 watch(
   assets,
   (newAssets) => {
-    watchlist.value.stock = newAssets.map((item) => ({
+    watchlist.value.stock = newAssets.filter(item => item.which_table != '1').map((item) => ({
       code: item.symbol,
       name: item.symbol,
       price: item.last_price,
