@@ -7,7 +7,7 @@ class WatchlistModel {
     return result.insertId;
   }
   static async updateWhichTable(which_table,id){
-    const [result] = await db.query(
+    const [result] = await db.execute(
       'UPDATE watchlist SET which_table = ? WHERE id = ?',
       [which_table, id]
     );
@@ -36,7 +36,6 @@ class WatchlistModel {
       );
       return result.affectedRows;
   }
-
   static async destroy(watchId) {
     const [result] = await db.query('DELETE FROM watchlist WHERE id = ?', [watchId]);
     return result.affectedRows;
@@ -54,6 +53,7 @@ class WatchlistModel {
     const currentWhichTable = currentItem.which_table;
  
     // 2. 根据入参 which_table 和当前记录的 which_table 执行不同操作
+    // 取消收藏
     if (which_table === "0") {
         if (currentWhichTable === "0") {
             // 情况1: 删除记录
@@ -63,13 +63,15 @@ class WatchlistModel {
             return 0;
         } else if (currentWhichTable === "2") {
             // 情况3: 更新为 1
-            return await this.update(
-                { which_table : "1" },
+            return await this.updateWhichTable(
+                '1',
                 id
             );
             
         }
-    } else if (which_table === "1") {
+    } 
+    // 持仓
+    else if (which_table === "1") {
         if (currentWhichTable === "1") {
             // 情况1: 删除记录
             return await this.destroy({ where: { id: id } });
