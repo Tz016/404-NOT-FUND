@@ -2,7 +2,7 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 
-const API_BASE = 'http://localhost:3000'
+const API_BASE = 'https://981c4eefa734.ngrok-free.app'
 const CACHE_KEY = 'market_popular_cache_v1'
 const CACHE_TTL_MS = 5 * 60 * 1000
 
@@ -71,7 +71,12 @@ export const useMarketStore = defineStore('market', {
     async fetchPopular(n = 50, silent = false) {
       if (!silent) { this.loading = true; this.error = '' }
       try {
-        const { data } = await axios.get(`${API_BASE}/stocks/popular`, { params: { n } })
+        const { data } = await axios.get(`${API_BASE}/stocks/popular`, { params: { n },
+        headers: {
+      'ngrok-skip-browser-warning': 'true',
+      'Accept': 'application/json'
+    
+    } })
         const arr = Array.isArray(data) ? data : []
         this.popular = arr
         this.lastLoadedAt = Date.now()

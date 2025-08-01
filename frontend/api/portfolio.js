@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'http://localhost:3000/api', // 后端地址
+  baseURL: 'https://981c4eefa734.ngrok-free.app/api', // 后端地址
 })
 
 export function getPortfolio() {

@@ -120,7 +120,7 @@ const { assets } = storeToRefs(portfolioStore)
 const marketStore = useMarketStore()
 const socketStore = useSocketStore()
 
-const API_BASE = 'http://localhost:3000'
+const API_BASE = 'https://981c4eefa734.ngrok-free.app'
 const searchInput = ref('')
 const suggLoading = ref(false)
 
@@ -192,7 +192,12 @@ async function fetchSuggestions(queryString, cb) {
     if (!queryString) return cb([])
     suggLoading.value = true
     try {
-        const { data } = await axios.get(`${API_BASE}/stocks/search`, { params: { query: queryString } })
+        const { data } = await axios.get(`${API_BASE}/stocks/search`, { params: { query: queryString } ,
+        headers: {
+      'ngrok-skip-browser-warning': 'true',
+      'Accept': 'application/json'
+    }
+    })
         const mapped = (Array.isArray(data) ? data : [])
             .filter(x => x.symbol)
             .slice(0, 12)

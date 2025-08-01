@@ -18,7 +18,11 @@
   let socket;
   
   onMounted(() => {
-    socket = io("http://localhost:3000");
+    socket = io("https://981c4eefa734.ngrok-free.app",{headers: {
+      'ngrok-skip-browser-warning': 'true',
+      'Accept': 'application/json'
+    }
+    });
     socket.on('analysisUpdate', (data) => {
       console.log('收到分析数据', data);
       pieData.value = data.pieData;

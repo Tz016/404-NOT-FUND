@@ -30,9 +30,9 @@
             <td>{{ item.symbol }}</td>
             <td>{{ item.status }}</td>
             <td>
-              {{ item.lots && item.lots.length > 0
-                  ? item.lots.reduce((sum, lot) => sum + Number(lot.shares || 0), 0)
-                  : 0
+              {{item.lots && item.lots.length > 0
+                ? item.lots.reduce((sum, lot) => sum + Number(lot.shares || 0), 0)
+                : 0
               }}
             </td>
             <td :class="[
@@ -44,16 +44,20 @@
             <td>{{ item.totalCost }}</td>
             <td>{{ item.marketValue }}</td>
             <td>{{ item.totDivIncome }}</td>
-            <td :class="{ 'gain': item.dayGainPercent && item.dayGainPercent.includes('+'), 'loss': item.dayGainPercent && item.dayGainPercent.includes('-') }">
+            <td
+              :class="{ 'gain': item.dayGainPercent && item.dayGainPercent.includes('+'), 'loss': item.dayGainPercent && item.dayGainPercent.includes('-') }">
               {{ item.dayGainPercent }}
             </td>
-            <td :class="{ 'gain': item.dayGainAmount && item.dayGainAmount.includes('+'), 'loss': item.dayGainAmount && item.dayGainAmount.includes('-') }">
+            <td
+              :class="{ 'gain': item.dayGainAmount && item.dayGainAmount.includes('+'), 'loss': item.dayGainAmount && item.dayGainAmount.includes('-') }">
               {{ item.dayGainAmount }}
             </td>
-            <td :class="{ 'gain': item.totGainPercent && item.totGainPercent.includes('+'), 'loss': item.totGainPercent && item.totGainPercent.includes('-') }">
+            <td
+              :class="{ 'gain': item.totGainPercent && item.totGainPercent.includes('+'), 'loss': item.totGainPercent && item.totGainPercent.includes('-') }">
               {{ item.totGainPercent }}
             </td>
-            <td :class="{ 'gain': item.totGainAmount && item.totGainAmount.includes('+'), 'loss': item.totGainAmount && item.totGainAmount.includes('-') }">
+            <td
+              :class="{ 'gain': item.totGainAmount && item.totGainAmount.includes('+'), 'loss': item.totGainAmount && item.totGainAmount.includes('-') }">
               {{ item.totGainAmount }}
             </td>
             <td>{{ item.realizedGain }}</td>
@@ -168,12 +172,17 @@ async function addLot(index) {
   // 获取最新价格
   const symbol = props.watchlist[index].symbol
   try {
-    const res = await fetch(`http://localhost:3000/stocks/price/${symbol}`)
+    const res = await fetch(`https://981c4eefa734.ngrok-free.app/stocks/price/${symbol}`, {
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+        'Accept': 'application/json'
+      }
+    })
     const data = await res.json()
     if (data && data.regularMarketPrice !== undefined && data.regularMarketPrice !== null) {
       newLot.costShare = data.regularMarketPrice
     }
-  } catch {}
+  } catch { }
 }
 
 async function confirmAddLot(index) {
@@ -253,34 +262,42 @@ function cancelAddLot() {
   background-color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
+
 table {
   width: 100%;
   border-collapse: collapse;
 }
-th, td {
+
+th,
+td {
   padding: 12px 15px;
   text-align: left;
   border-bottom: 1px solid #dee2e6;
 }
+
 th {
   background-color: #edf2f7;
   font-weight: 500;
   color: #2c3e50;
 }
+
 .expand-icon {
   cursor: pointer;
   color: #666;
   font-size: 18px;
   user-select: none;
 }
+
 .gain {
   color: #38a169;
   font-weight: 500;
 }
+
 .loss {
   color: #e53e3e;
   font-weight: 500;
 }
+
 .add-share-btn {
   background: #ffd04b;
   color: #fff;
@@ -291,9 +308,11 @@ th {
   cursor: pointer;
   transition: background 0.2s;
 }
+
 .add-share-btn:hover {
   background: #4b018f;
 }
+
 .lot-cell {
   background: #f5f6fa;
   padding: 0;
@@ -301,10 +320,12 @@ th {
   /* 额外缩进 */
   position: relative;
 }
+
 .lot-table {
   margin-left: 8px;
   padding: 16px 0 0 0;
 }
+
 .add-lot-btn {
   background: none;
   border: 1px solid #ffd04b;
@@ -317,21 +338,27 @@ th {
   margin-left: 8px;
   transition: background 0.2s, color 0.2s;
 }
+
 .add-lot-btn:hover {
   background: #ffd04b;
   color: #fff;
 }
+
 .lot-inner-table {
   width: 100%;
   border-collapse: collapse;
   background: #fff;
 }
-.lot-inner-table th, .lot-inner-table td {
+
+.lot-inner-table th,
+.lot-inner-table td {
   padding: 8px 10px;
   border-bottom: 1px solid #e0e3e8;
   font-size: 14px;
 }
-.lot-confirm-btn, .lot-cancel-btn {
+
+.lot-confirm-btn,
+.lot-cancel-btn {
   padding: 4px 10px;
   border-radius: 6px;
   border: none;
@@ -339,34 +366,50 @@ th {
   font-size: 13px;
   cursor: pointer;
 }
+
 .lot-confirm-btn {
   background: #ffd04b;
   color: #fff;
 }
+
 .lot-cancel-btn {
   background: #eee;
   color: #333;
 }
+
 .lot-confirm-btn:hover {
   background: #4b018f;
 }
+
 .lot-cancel-btn:hover {
   background: #ccc;
 }
+
 .price-up {
   color: #e53e3e;
   font-weight: bold;
 }
+
 .price-down {
   color: #38a169;
   font-weight: bold;
 }
+
 .flash-anim {
   animation: flash-bg 0.6s;
 }
+
 @keyframes flash-bg {
-  0%   { background: #ffe066; }
-  60%  { background: #ffe066; }
-  100% { background: transparent; }
+  0% {
+    background: #ffe066;
+  }
+
+  60% {
+    background: #ffe066;
+  }
+
+  100% {
+    background: transparent;
+  }
 }
 </style>

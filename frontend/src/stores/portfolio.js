@@ -14,7 +14,12 @@ export const usePortfolioStore = defineStore('portfolio', {
   actions: {
     
     async fetchAccount(accountId) {
-      const res = await axios.get(`http://localhost:3000/accounts/100023`)
+      const res = await axios.get(`https://981c4eefa734.ngrok-free.app/accounts/100023`,
+        {headers: {
+      'ngrok-skip-browser-warning': 'true',
+      'Accept': 'application/json'
+    }
+    })
       if (res.data?.success) {
         this.account = res.data.data
         this.balance = Number(res.data.data.balance)
@@ -22,7 +27,12 @@ export const usePortfolioStore = defineStore('portfolio', {
     },
 
     async fetchAssets(accountId) {
-      const res = await axios.get(`http://localhost:3000/watchlist/100023`)
+      const res = await axios.get(`https://981c4eefa734.ngrok-free.app/watchlist/100023`,
+        {headers: {
+      'ngrok-skip-browser-warning': 'true',
+      'Accept': 'application/json'
+    }
+    })
       this.assets = res.data || []
     },
     
