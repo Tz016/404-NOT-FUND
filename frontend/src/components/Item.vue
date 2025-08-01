@@ -198,6 +198,8 @@ const watchlisted = ref(
     props.item.which_table == '0' || props.item.which_table == '2'
 )
 watch(() => props.item.which_table, (val) => {
+    console.log('props.item.which_table, watchlisted',props.item.which_table)
+
     watchlisted.value = val == '0' || val == '2'
 })
 console.log('props.item', props.item)
@@ -211,17 +213,30 @@ async function onToggleWatchlist() {
     try {
         let res
         if (next) {
-            res = await axios.post('http://localhost:3000/watchlist/add', {
+            res = await axios.post('https://981c4eefa734.ngrok-free.app/watchlist/add', {
                 accountId: 100023,
                 which_table: '0',
                 symbol: props.item.code
+            }, {
+                headers: {
+                    'ngrok-skip-browser-warning': 'true',
+                    'Accept': 'application/json'
+                }
             })
         } else {
-            res = await axios.put('http://localhost:3000/watchlist/delete', {
+            res = await axios.put('https://981c4eefa734.ngrok-free.app/watchlist/delete', {
+
                 watchId: props.item.watch_id || props.item.id,
                 which_table: '0',
                 accountId: 100023,
                 symbol: props.item.code
+
+            }, {
+                headers: {
+                    'ngrok-skip-browser-warning': 'true',
+                    'Accept': 'application/json'
+                }
+
             })
         }
 
@@ -288,8 +303,15 @@ async function onConfirm() {
         }
         console.log("即将发送交易请求:", payload)
         const res = await axios.put(
-            'http://localhost:3000/watchlist/update/addTransaction',
-            payload
+            'https://981c4eefa734.ngrok-free.app/watchlist/update/addTransaction',
+            payload,
+            {
+                headers: {
+                    'ngrok-skip-browser-warning': 'true',
+                    'Accept': 'application/json'
+                }
+            }
+
         )
         console.log("交易请求结果:", res)
         if (res.data?.success) {
